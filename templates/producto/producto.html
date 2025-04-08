@@ -1,0 +1,48 @@
+<!--Pagina de añadir Productos-->
+{% extends 'base.html' %}
+
+{% block title %}Añadir Productos{% endblock %}
+
+{% block header %}Añadir Producto{% endblock %}
+
+{% block content %}
+<form action="/add_product" method="post">
+    <label for="nombre">Nombre:</label>
+    <input type="text" id="nombre" name="nombre" required>
+
+    <label for="descripcion">Descripción:</label>
+    <textarea id="descripcion" name="descripcion" required></textarea>
+
+    <label for="precio">Precio:</label>
+    <input type="number" id="precio" name="precio" step="0.01" required>
+
+    <label for="stock">Stock:</label>
+    <input type="number" id="stock" name="stock" required>
+
+    <label for="proveedor_id">Proveedor:</label>
+    <select id="proveedor_id" name="proveedor_id" required>
+        <option value="">Selecciona un proveedor</option>
+        {% for proveedor in proveedores %}
+        <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+        {% endfor %}
+        <option value="nuevo">-- Nuevo Proveedor --</option>
+    </select>
+
+    <button type="submit">Añadir Producto</button>
+</form>
+
+<!-- Botón "Cancelar" -->
+<button type="button" class="btn" onclick="cancelar()">Cancelar</button>
+
+<script>
+    function cancelar() {
+        window.location.href = "{{ url_for('productos.ver_productos') }}";
+    }
+
+    document.getElementById("proveedor_id").addEventListener("change", function () {
+        if (this.value === "nuevo") {
+            window.location.href = "{{ url_for('proveedores.proveedores') }}";  // Redirige a la página de creación de proveedor
+        }
+    });
+</script>
+{% endblock %}

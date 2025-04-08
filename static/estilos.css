@@ -28,13 +28,22 @@ nav ul li a {
     background: #007BFF;
     padding: 10px 15px;
     border-radius: 5px;
+    transition: 0.3s;
+}
+
+nav ul li a:hover {
+    background-color: #0056b3;
+}
+
+nav ul li a.active {
+    background-color: #555;
+    color: white;
+    font-weight: bold;
 }
 
 main {
     padding: 20px;
 }
-
-#Estilo Producto
 
 form {
     width: 50%;
@@ -59,6 +68,7 @@ input, textarea {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
+    margin-right: 20px; /* Espacio entre botones */
 }
 
 textarea {
@@ -66,9 +76,11 @@ textarea {
     height: 100px;
 }
 
-button {
-    display: block;
-    width: 100%;
+select {
+    margin-bottom: 15px; /* Espaciado para el selector */
+}
+
+button, .btn {
     background: #007BFF;
     color: white;
     padding: 12px;
@@ -77,8 +89,88 @@ button {
     cursor: pointer;
     font-size: 18px;
     border-radius: 5px;
+    transition: 0.3s;
+    text-decoration: none;
+    display: inline-block;
+    margin-right: 10px; /* Espacio entre botones */
 }
 
-button:hover {
+button:hover, .btn:hover {
     background: #0056b3;
 }
+
+/* Botón de añadir */
+.btn-add {
+    background: #28a745;
+}
+
+.btn-add:hover {
+    background: #218838;
+}
+
+/* Botón de eliminar */
+.btn-delete {
+    background: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+}
+
+/* Tablas */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 16px;
+    text-align: left;
+}
+
+th, td {
+    padding: 12px;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Alertas */
+.alerta {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+}
+
+.alerta ul {
+    margin: 0;
+    padding: 0;
+}
+
+.alerta li {
+    list-style: none;
+}
+
+/* Footer */
+footer {
+    background: #333;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+    margin-top: auto;
+}
+
+
+

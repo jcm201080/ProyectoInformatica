@@ -1,29 +1,29 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tienda de Informática</title>
-    <link rel="stylesheet" href="/static/estilos.css">
-</head>
-<body>
-    <header>
-        <h1>Tienda de informática</h1>
-        <nav>
-            <ul>
-                <li><a href="">Ver Productos</a> </li>
-                <li><a href="{{ url_for('producto') }}" class="btn">Añadir Productos</a></li>
-                <li><a href="">Proveedores</a> </li>
-            </ul>
-        </nav>
-    </header>
-<main>
-    <h2>Bienvenidos a nuestra tienda</h2>
-    <p>Explora nuestros productos y gestiona tu inventario de manera sencilla</p>
-    <div class="botones">
-        <a href="" class="btn">Ver Productos</a>
-        <a href="" class="btn">Añadir Productos</a>
-    </div>
-</main>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Inicio - Tienda de Informática{% endblock %}
+
+{% block header %}Bienvenido a la Tienda de Informática{% endblock %}
+
+{% block content %}
+<section class="intro">
+    <h2>Tu solución en tecnología</h2>
+    <p>Somos una tienda especializada en la venta de productos informáticos. Desde ordenadores y periféricos hasta software y accesorios, tenemos todo lo que necesitas.</p>
+    <img src="/static/images/tienda-informatica.jpg" alt="Tienda de Informática" class="intro-image">
+</section>
+
+<section class="features">
+    <h2>Nuestros servicios</h2>
+    <ul>
+        <li><strong>Venta de productos:</strong> Encuentra los mejores dispositivos y componentes para tu equipo.</li>
+        <li><strong>Gestión de proveedores:</strong> Mantenemos relaciones con los mejores fabricantes del sector.</li>
+        <li><strong>Registro de clientes:</strong> Ofrecemos una experiencia personalizada a cada usuario.</li>
+        <li><strong>Control de ventas:</strong> Gestiona tus compras y pedidos fácilmente.</li>
+    </ul>
+</section>
+
+<section class="cta">
+    <h2>Explora nuestro catálogo</h2>
+    <p>Descubre los mejores productos para mejorar tu experiencia informática.</p>
+    <a href="{{ url_for('productos.ver_productos') }}" class="btn">Ver Productos</a>
+</section>
+{% endblock %}

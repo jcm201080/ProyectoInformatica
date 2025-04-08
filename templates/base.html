@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Tienda de Informática{% endblock %}</title>
+    <link rel="stylesheet" href="/static/estilos.css">
+</head>
+<body>
+    <header>
+        <h1>{% block header %}Tienda de informática{% endblock %}</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}" class="{% if request.endpoint == 'index' %}active{% endif %}">Inicio</a></li>
+                <li><a href="{{ url_for('productos.ver_productos') }}" class="{% if request.endpoint == 'productos.ver_productos' %}active{% endif %}">Productos</a></li>
+                <li><a href="{{ url_for('proveedores.proveedores') }}" class="{% if request.endpoint == 'proveedores.proveedores' %}active{% endif %}">Proveedores</a></li>
+                <li><a href="{{ url_for('clientes.clientes') }}" class="{% if request.endpoint == 'clientes.clientes' %}active{% endif %}">Clientes</a></li>
+                <li><a href="{{ url_for('ventas.ventas') }}" class="{% if request.endpoint == 'ventas.ventas' %}active{% endif %}">Ventas</a></li>
+                {% if 'usuario' in session %}
+                    <li><a href="{{ url_for('logout') }}" class="btn logout-btn">Cerrar Sesión ({{ session['usuario'] }})</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('login') }}" class="btn {% if request.endpoint == 'login' %}active{% endif %}">Iniciar Sesión</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2025 Tienda de Informática | Desarrollado por Jesús</p>
+    </footer>
+
+    <!-- Mensajes Flash -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="flash {{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>
+

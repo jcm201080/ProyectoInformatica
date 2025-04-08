@@ -1,0 +1,46 @@
+<!--Página principal productos-->
+{% extends 'base.html' %}
+
+{% block title %}Productos{% endblock %}
+
+{% block header %}Nuestros Productos{% endblock %}
+
+{% block content %}
+<!-- Botón "Añadir" con clase especial -->
+<a href="{{ url_for('productos.productos') }}" class="btn btn-add">Añadir</a>
+
+<h2>Lista de productos</h2>
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Proveedor ID</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for producto in productos %}
+        <tr>
+            <td>{{ producto.id }}</td>
+            <td>{{ producto.nombre }}</td>
+            <td>{{ producto.descripcion }}</td>
+            <td>{{ producto.precio }}</td>
+            <td>{{ producto.stock }}</td>
+            <td>{{ producto.proveedor_id }}</td>
+            <td>
+                <a href="{{ url_for('productos.editar_producto', id=producto.id) }}" class="btn">Editar</a>
+                <form action="{{ url_for('productos.eliminar_producto', id=producto.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-delete" onclick="return confirm('¿Estás seguro de que deseas eliminar este producto?')">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}
+%}

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Gráficas de Ventas{% endblock %}
+
+{% block content %}
+    <h2>Gráficas de Ventas</h2>
+
+    <canvas id="ventasChart"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        fetch("{{ url_for('ventas.datos_ventas') }}")
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById("ventasChart").getContext("2d");
+
+            // Generamos colores aleatorios para cada columna
+            const colores = data.productos.map(() => obtenerColorAleatorio());
+
+            new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: data.productos,
+                    datasets: [{
+                        label: "Ventas por Producto",
+                        data: data.cantidades,
+                        backgroundColor: colores,  // Aquí aplicamos los colores aleatorios
+                        borderColor: "rgba(54, 162, 235, 1)",
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        });
+    </script>
+<canvas id="graficaMes"></canvas>
+<select id="selectorMes" onchange="cargarGrafica(this.value)">
+    <option value="01">Enero</option>
+    <option value="02">Febrero</option>
+    <option value="03">Marzo</option>
+    <option value="04" selected>Abril</option>
+    <option value="05">Mayo</option>
+    <option value="06">Junio</option>
+    <option value="07">Julio</option>
+    <option value="08">Agosto</option>
+    <option value="09">Septiembre</option>
+    <option value="10">Octubre</option>
+    <option value="11">Noviembre</option>
+    <option value="12">Diciembre</option>
+</select>
+<script>
+    let graficaMes = null;  // Variable global para almacenar la gráfica
+
+    function cargarGrafica(mes) {
+        fetch(`/ventas_por_mes?mes=${mes}`)
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('graficaMes').getContext('2d');
+
+            // Si ya existe una gráfica, la destruimos antes de crear una nueva
+            if (graficaMes) {
+                graficaMes.destroy();
+            }
+
+            // Generamos colores aleatorios para cada columna
+            const colores = data.productos.map(() => obtenerColorAleatorio());
+
+            // Creamos la nueva gráfica y la guardamos en la variable global
+            graficaMes = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.productos,
+                    datasets: [{
+                        label: 'Ventas por mes',
+                        data: data.cantidades,
+                        backgroundColor: colores,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error("Error al obtener datos:", error));
+    }
+
+    // Llamar a la función con un mes por defecto (ejemplo: abril)
+    document.addEventListener("DOMContentLoaded", () => {
+        cargarGrafica("04");
+    });
+
+
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/colores.js') }}"></script>
+<script src="{{ url_for('static', filename='js/graficas.js') }}"></script>
+
+
+{% endblock %}
