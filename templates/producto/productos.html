@@ -19,6 +19,7 @@
             <th>Precio</th>
             <th>Stock</th>
             <th>Proveedor ID</th>
+            <th>Cantidad Total</th>
             <th>Acciones</th>
         </tr>
     </thead>
@@ -31,6 +32,7 @@
             <td>{{ producto.precio }}</td>
             <td>{{ producto.stock }}</td>
             <td>{{ producto.proveedor_id }}</td>
+            <td>{{ producto.cantidad_total }}</td>
             <td>
                 <a href="{{ url_for('productos.editar_producto', id=producto.id) }}" class="btn">Editar</a>
                 <form action="{{ url_for('productos.eliminar_producto', id=producto.id) }}" method="post" style="display:inline;">

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Productos - Tienda{% endblock %}
+
+{% block header %}Nuestros Productos{% endblock %}
+
+{% block content %}
+    <h2>Graficas</h2>
+    <!-- Aquí va el contenido específico de productos -->
+<h3>Stock de productos</h3>
+<canvas id="stockChart"></canvas>
+<!-- 📊 Gráfica: Stock de productos -->
+<script src="{{ url_for('static', filename='js/graficas/stock.js') }}"></script>
+
+<h3>Ventas por cliente</h3>
+<canvas id="ventasClienteChart"></canvas>
+<!-- 📊 Gráfica: Venta por cliente -->
+<script src="{{ url_for('static', filename='js/graficas/ventas_cliente.js') }}"></script>
+
+<h3>Ingresos por mes</h3>
+<canvas id="ingresosMesChart"></canvas>
+
+<h3>Comparativa de Ventas y Compras por Proveedor</h3>
+<canvas id="comparativaProveedoresChart"></canvas>
+<!-- 📊 Gráfica: Comparativa ventas compras por proveedor -->
+<script src="{{ url_for('static', filename='js/graficas/comparativa_proveedores.js') }}"></script>
+
+
+
+<!-- Scripts necesarios -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="{{ url_for('static', filename='js/colores.js') }}"></script>
+<script src="{{ url_for('static', filename='js/graficas/funciones_graficas.js') }}"></script>
+
+
+
+
+
+
+<!-- 📊 Gráfica: Ingresos por mes -->
+<script src="{{ url_for('static', filename='js/graficas/ingresos_mes.js') }}"></script>
+
+
+{% endblock %}
