@@ -5,8 +5,8 @@
 {% block header %}Página de Ventas{% endblock %}
 
 {% block content %}
-<h2>Listado de Ventas</h2>
-<a href="{{ url_for('ventas.nueva_venta') }}" class="btn btn-add">Registrar Nueva Venta</a>
+<h1>Listado de Ventas</h1>
+<a href="{{ url_for('ventas.nueva_venta') }}" class="btn btn-add">➕ Añadir Venta</a>
 <table>
     <thead>
         <tr>
@@ -21,8 +21,7 @@
         </tr>
     </thead>
     <tbody>
-        <a href="{{ url_for('ventas.graficas') }}" class="btn btn-add">Ver Gráficas</a>
-
+        <a href="{{ url_for('ventas.graficas_ventas') }}" class="btn btn-add">Ver Gráficas</a>
         {% for venta in ventas %}
         <tr>
             <td>{{ venta.id }}</td>

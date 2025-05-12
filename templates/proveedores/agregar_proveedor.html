@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Añadir Proveedor{% endblock %}
+
+{% block header %}Añadir Proveedor{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Nuevo Proveedor</h1>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-info">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ url_for('proveedores.add_proveedor') }}" method="POST">
+                <div class="mb-3">
+                    <label for="nombre" class="form-label">Empresa:</label>
+                    <input type="text" class="form-control" id="nombre" name="nombre" required>
+                </div>
+                <div class="mb-3">
+                    <label for="cif" class="form-label">CIF/DNI:</label>
+                    <input type="text" class="form-control" id="cif" name="cif" required>
+                </div>
+                <div class="mb-3">
+                    <label for="contacto" class="form-label">Contacto:</label>
+                    <input type="text" class="form-control" id="contacto" name="contacto">
+                </div>
+                <div class="mb-3">
+                    <label for="telefono" class="form-label">Teléfono:</label>
+                    <input type="text" class="form-control" id="telefono" name="telefono">
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email:</label>
+                    <input type="email" class="form-control" id="email" name="email">
+                </div>
+                <div class="mb-3">
+                    <label for="direccion" class="form-label">Dirección:</label>
+                    <input type="text" class="form-control" id="direccion" name="direccion">
+                </div>
+                <button type="submit" class="btn btn-add">Guardar</button>
+                <a href="{{ url_for('proveedores.listar_proveedores') }}" class="btn btn-cancel">Cancelar</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

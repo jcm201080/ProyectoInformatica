@@ -1,16 +1,14 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
-
 from sqlalchemy.dialects.mysql import DECIMAL
 from sqlalchemy import func
-
-from db import sesion, Venta, DetalleVenta, Cliente, Producto
+from db import sesion, Venta, DetalleVenta, Cliente, Producto, login_required, rol_requerido
 from decimal import Decimal
-
 from routes.productos import productos_bp
 
 ventas_bp = Blueprint("ventas", __name__)
 
 @ventas_bp.route("/ventas")
+@login_required
 def ventas():
     # Obtener los parámetros de búsqueda (si existen)
     cliente = request.args.get("cliente")
@@ -38,6 +36,7 @@ def ventas():
 
 
 @ventas_bp.route("/nueva_venta", methods=["GET", "POST"])
+@rol_requerido('admin')
 def nueva_venta():
     clientes = sesion.query(Cliente).all()
     productos = sesion.query(Producto).all()
@@ -104,6 +103,7 @@ def nueva_venta():
 
 #Cambia estado de pago
 @ventas_bp.route("/cambiar_estado_pago/<int:venta_id>/<int:nuevo_estado>", methods=["POST"])
+@login_required
 def cambiar_estado_pago(venta_id, nuevo_estado):
     # Usamos `sesion` en lugar de `db`
     venta = sesion.get(Venta, venta_id)  # Aquí cambiamos db por sesion
@@ -117,6 +117,7 @@ def cambiar_estado_pago(venta_id, nuevo_estado):
 
 
 @ventas_bp.route("/venta_detalle/<int:venta_id>")
+@login_required
 def ver_detalle_venta(venta_id):
     # Obtener la venta y sus productos asociados
     venta = sesion.query(Venta).get(venta_id)
@@ -147,6 +148,7 @@ def ver_detalle_venta(venta_id):
 
 
 @ventas_bp.route("/registrar_venta", methods=["POST"])
+@rol_requerido('admin')
 def registrar_venta():
     # Datos recibidos del formulario de venta
     productos_vendidos = request.form.getlist('productos')  # Lista de productos vendidos
@@ -185,13 +187,15 @@ def registrar_venta():
 
 
 #Gráficas
-@ventas_bp.route('/graficas')
-def graficas():
+@ventas_bp.route('/graficas_ventas')
+@login_required
+def graficas_ventas():
     return render_template('ventas/graficas.html')
 
 
 #Venta por productos
 @ventas_bp.route("/datos_ventas")
+@login_required
 def datos_ventas():
     # Realizar la consulta para obtener la suma de las cantidades por producto
     datos = sesion.query(
@@ -212,6 +216,7 @@ def datos_ventas():
 
 #Venta por mes
 @ventas_bp.route("/ventas_por_mes", methods=["GET"])
+@login_required
 def ventas_por_mes():
     mes = request.args.get("mes")
 

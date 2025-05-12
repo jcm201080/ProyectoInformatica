@@ -1,5 +1,3 @@
-<!--EDITAR PRODUCTOS-->
-
 {% extends "base.html" %}
 
 {% block title %}Editar Producto{% endblock %}
@@ -7,6 +5,8 @@
 {% block header %}Editar Producto{% endblock %}
 
 {% block content %}
+<h2 class="form-title">Editar Producto</h2>
+
 <form action="{{ url_for('productos.editar_producto', id=producto.id) }}" method="post">
     <label for="nombre">Nombre:</label>
     <input type="text" id="nombre" name="nombre" value="{{ producto.nombre }}" required>
@@ -20,9 +20,15 @@
     <label for="stock">Stock:</label>
     <input type="number" id="stock" name="stock" value="{{ producto.stock }}" required>
 
-    <label for="proveedor_id">Proveedor ID:</label>
+    <label for="proveedor_id">ID del Proveedor:</label>
     <input type="number" id="proveedor_id" name="proveedor_id" value="{{ producto.proveedor_id }}" required>
 
-    <button type="submit">Guardar Cambios</button>
+    <label for="cantidad_total">Cantidad Total:</label>
+    <input type="number" id="cantidad_total" name="cantidad_total" value="{{ producto.cantidad_total }}" required>
+
+    <div class="botonera">
+        <button type="submit" class="btn btn-edit">💾 Guardar</button>
+        <a href="{{ url_for('productos.ver_productos') }}" class="btn btn-cancel">❌ Cancelar</a>
+    </div>
 </form>
 {% endblock %}

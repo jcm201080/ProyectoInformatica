@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <nav>
+  <ul class="menu">
+  <li><a href="{{ url_for('graficas_py.graficas_ventas_python') }}" class="{% if request.endpoint == 'graficas_py.graficas_ventas_python' %}active{% endif %}">Gráficas Python</a></li>
+  <li><a href="{{ url_for('graficas.graficas') }}" class="{% if request.endpoint == 'graficas.graficas' %}active{% endif %}">Gráficas JS</a></li>
+
+  </ul>
+  </nav>
+  <h1>Gráficas Generadas con Python</h1>
+
+  <h2>Ventas Totales</h2>
+  <img src="{{ url_for('static', filename='graficas/ventas.png') }}" alt="Gráfica de Ventas">
+
+  <h2>Compras por Proveedor</h2>
+  <img src="{{ url_for('static', filename='graficas/compras_por_proveedor.png') }}" alt="Compras por proveedor">
+
+  <h2>Compras por Mes</h2>
+  <img src="{{ url_for('static', filename='graficas/compras_por_mes.png') }}" alt="Compras mensuales">
+
+  <h2>Comparativa Compras vs Ventas por Producto</h2>
+  <img src="{{ url_for('static', filename='graficas/comparativa_productos.png') }}" alt="Gráfica Comparativa Compras/Ventas">
+
+
+{% endblock %}

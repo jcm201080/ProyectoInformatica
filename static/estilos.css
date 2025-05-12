@@ -1,28 +1,52 @@
-body {
-    font-family: Arial, sans-serif;
+/* Estilos generales del body */
+/* General body styles */
+html, body {
+    height: 100%; /* Asegura que el body use el alto completo */
     margin: 0;
     padding: 0;
+    font-family: Arial, sans-serif;
     background-color: #f4f4f4;
     text-align: center;
 }
 
+/* Envoltura principal para asegurar footer al fondo */
+/* Main wrapper to keep footer at the bottom */
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1;
+    padding: 20px;
+}
+
+/* Encabezado */
+/* Header */
 header {
     background: #333;
     color: white;
     padding: 20px;
 }
 
-nav ul {
+/* Menú de navegación principal */
+/* Main navigation menu */
+nav ul.menu {
     list-style: none;
     padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
 }
 
-nav ul li {
-    display: inline;
-    margin: 10px;
+nav ul.menu li {
+    display: flex;
 }
 
-nav ul li a {
+nav ul.menu li a {
     text-decoration: none;
     color: white;
     background: #007BFF;
@@ -31,20 +55,17 @@ nav ul li a {
     transition: 0.3s;
 }
 
-nav ul li a:hover {
+nav ul.menu li a:hover {
     background-color: #0056b3;
 }
 
-nav ul li a.active {
+nav ul.menu li a.active {
     background-color: #555;
     color: white;
     font-weight: bold;
 }
 
-main {
-    padding: 20px;
-}
-
+/* Formularios */
 form {
     width: 50%;
     margin: 20px auto;
@@ -53,6 +74,10 @@ form {
     border-radius: 10px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
     text-align: left;
+}
+
+form input, form textarea, form select {
+    margin-bottom: 15px;
 }
 
 label {
@@ -68,7 +93,6 @@ input, textarea {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
-    margin-right: 20px; /* Espacio entre botones */
 }
 
 textarea {
@@ -77,9 +101,10 @@ textarea {
 }
 
 select {
-    margin-bottom: 15px; /* Espaciado para el selector */
+    margin-bottom: 15px;
 }
 
+/* Botones */
 button, .btn {
     background: #007BFF;
     color: white;
@@ -92,32 +117,54 @@ button, .btn {
     transition: 0.3s;
     text-decoration: none;
     display: inline-block;
-    margin-right: 10px; /* Espacio entre botones */
+    margin-right: 10px;
 }
 
 button:hover, .btn:hover {
     background: #0056b3;
 }
 
-/* Botón de añadir */
+/* Botón adicional para "Agregar" */
 .btn-add {
-    background: #28a745;
+    background: #371777;
 }
 
 .btn-add:hover {
     background: #218838;
 }
 
-/* Botón de eliminar */
-.btn-delete {
-    background: #dc3545;
-    color: white;
+/* Botones de eliminar y editar */
+.form-delete {
+    display: inline;
+    background-color: transparent;
+    padding: 0;
+    margin: 0;
     border: none;
-    padding: 10px 15px;
+    max-width: fit-content;
 }
 
-.btn-delete:hover {
-    background: #c82333;
+.form-delete button,
+.btn-edit {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.form-delete button:hover,
+.btn-edit:hover {
+    background-color: #0056b3;
+}
+
+/* Títulos de formularios */
+.form-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
 }
 
 /* Tablas */
@@ -143,7 +190,7 @@ tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-/* Alertas */
+/* Alertas tipo flash */
 .alerta {
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
@@ -162,7 +209,7 @@ tr:nth-child(even) {
     list-style: none;
 }
 
-/* Footer */
+/* Footer al pie de página */
 footer {
     background: #333;
     color: white;
@@ -172,5 +219,67 @@ footer {
     margin-top: auto;
 }
 
+/* Estilos para mensajes flash */
+.flashes {
+    list-style-type: none;
+    padding: 0;
+    margin: 1rem auto;
+    width: 90%;
+    max-width: 800px;
+}
 
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.alert-error {
+    background-color: #ffdddd;
+    color: #a70000;
+    border: 1px solid #a70000;
+}
+
+.alert-success {
+    background-color: #ddffdd;
+    color: #007700;
+    border: 1px solid #007700;
+}
+
+/* Estilos responsive */
+@media screen and (max-width: 600px) {
+    button, .btn {
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+
+    form {
+        width: 90%;
+        padding: 15px;
+    }
+
+    table {
+        font-size: 14px;
+    }
+
+    nav ul.menu li a {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+}
+
+/* Menú responsive para tabletas/móviles */
+@media (max-width: 768px) {
+    nav ul.menu {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    nav ul.menu li a {
+        width: 100%;
+        text-align: center;
+    }
+}
 

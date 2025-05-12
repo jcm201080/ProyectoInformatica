@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Compras{% endblock %}
+
+{% block header %}Página de Compras{% endblock %}
+
+{% block content %}
+    <h1>Compras</h1>
+<!-- Botón "Añadir" con clase especial -->
+<a href="{{ url_for('compras.nueva_compra') }}" class="btn btn-add">➕ Añadir Compra</a>
+
+<!-- Formulario para añadir nueva Compra -->
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Producto Id</th>
+            <th>Proveedor Id</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+            <th>Fecha</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        {% for compra in compras %}
+        <tr>
+            <td>{{ compra.id }}</td>
+            <td>{{ compra.producto.id }}</td>
+            <td>{{ compra.proveedor.id }}</td>
+            <td>{{ compra.precio }}</td>
+            <td>{{ compra.cantidad }}</td>
+            <td>{{ compra.total }}</td>
+            <td>{{ compra.fecha }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

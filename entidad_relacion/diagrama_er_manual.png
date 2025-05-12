@@ -1,0 +1,63 @@
+// Diagrama Entidad-Relación
+digraph {
+	Categoria [label="Categoria
+- id
+- nombre"]
+	Proveedor [label="Proveedor
+- id
+- nombre
+- contacto
+- telefono
+- email"]
+	Producto [label="Producto
+- id
+- nombre
+- descripcion
+- categoria_id
+- precio
+- stock
+- cantidad_total
+- proveedor_id
+- fecha_creacion"]
+	Cliente [label="Cliente
+- id
+- nombre
+- contacto
+- telefono
+- email"]
+	Venta [label="Venta
+- id
+- cliente_id
+- fecha
+- total
+- descuento
+- total_final
+- pagado"]
+	DetalleVenta [label="DetalleVenta
+- id
+- venta_id
+- producto_id
+- cantidad
+- precio_unitario
+- subtotal"]
+	Compra [label="Compra
+- id
+- producto_id
+- proveedor_id
+- precio
+- cantidad
+- total
+- fecha"]
+	usuarios [label="usuarios
+- id
+- usuario
+- contrasena
+- rol"]
+	Producto -> Categoria [label=categoria_id]
+	Producto -> Proveedor [label=proveedor_id]
+	DetalleVenta -> Producto [label=producto_id]
+	DetalleVenta -> Venta [label=venta_id]
+	Venta -> Cliente [label=cliente_id]
+	Compra -> Producto [label=producto_id]
+	Compra -> Proveedor [label=proveedor_id]
+}

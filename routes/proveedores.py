@@ -1,63 +1,94 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from db import sesion, Proveedor, Producto
+from db import sesion, Producto, Proveedor, login_required, rol_requerido
 
 proveedores_bp = Blueprint('proveedores', __name__)
 
 @proveedores_bp.route('/proveedores')
-def proveedores():
+@login_required
+def listar_proveedores():
     proveedores = sesion.query(Proveedor).all()
-    return render_template('proveedor/proveedor.html', proveedores=proveedores)
+    return render_template('proveedores/proveedor.html', proveedores=proveedores)
+
+
+@proveedores_bp.route('/proveedores/nuevo')
+@login_required
+@rol_requerido('admin')
+def formulario_proveedor():
+    return render_template('proveedores/agregar_proveedor.html')
+
 
 @proveedores_bp.route('/add_proveedor', methods=['POST'])
+@login_required
+@rol_requerido('admin')
 def add_proveedor():
     nombre = request.form['nombre']
     contacto = request.form['contacto']
     telefono = request.form['telefono']
     email = request.form['email']
+    cif = request.form['cif']
+    direccion = request.form['direccion']
 
-    existe_proveedor = sesion.query(Proveedor).filter_by(nombre=nombre).first()
+    # Comprobamos si ya existe el proveedor (por nombre o CIF, mejor aún)
+    existe_proveedor = sesion.query(Proveedor).filter(
+        (Proveedor.nombre == nombre) | (Proveedor.cif == cif)
+    ).first()
     if existe_proveedor:
-        flash('Este proveedor ya existe.')
-        return redirect(url_for('proveedores.proveedores'))
+        flash('Este proveedor ya existe (por nombre o CIF).', 'warning')
+        return redirect(url_for('proveedores.listar_proveedores'))
 
-    nuevo_proveedor = Proveedor(nombre=nombre, contacto=contacto, telefono=telefono, email=email)
+    nuevo_proveedor = Proveedor(
+        nombre=nombre,
+        contacto=contacto,
+        telefono=telefono,
+        email=email,
+        cif=cif,
+        direccion=direccion
+    )
 
     try:
         sesion.add(nuevo_proveedor)
         sesion.commit()
-        flash('Proveedor añadido correctamente.')
+        flash('Proveedor añadido correctamente.', 'success')
     except Exception as e:
         sesion.rollback()
-        flash(f'Error al añadir proveedor: {str(e)}')
+        flash(f'Error al añadir proveedor: {str(e)}', 'danger')
 
-    return redirect(url_for('proveedores.proveedores'))
+    return redirect(url_for('proveedores.listar_proveedores'))
+
 
 @proveedores_bp.route('/editar_proveedor/<int:id>', methods=['GET', 'POST'])
+@login_required
+@rol_requerido('admin')
 def editar_proveedor(id):
     proveedor = sesion.query(Proveedor).filter_by(id=id).first()
 
     if not proveedor:
-        flash('Proveedor no encontrado.')
-        return redirect(url_for('proveedores.proveedores'))
+        flash('Proveedor no encontrado.', 'warning')
+        return redirect(url_for('proveedores.listar_proveedores'))
 
     if request.method == 'POST':
         proveedor.nombre = request.form['nombre']
         proveedor.contacto = request.form['contacto']
         proveedor.telefono = request.form['telefono']
         proveedor.email = request.form['email']
+        proveedor.cif = request.form['cif']
+        proveedor.direccion = request.form['direccion']
 
         try:
             sesion.commit()
-            flash('Proveedor actualizado correctamente.')
+            flash('Proveedor actualizado correctamente.', 'success')
         except Exception as e:
             sesion.rollback()
-            flash(f'Error al actualizar proveedor: {str(e)}')
+            flash(f'Error al actualizar proveedor: {str(e)}', 'danger')
 
-        return redirect(url_for('proveedores.proveedores'))
+        return redirect(url_for('proveedores.listar_proveedores'))
 
-    return render_template('proveedor/editar_proveedor.html', proveedor=proveedor)
+    return render_template('proveedores/editar_proveedor.html', proveedor=proveedor)
+
 
 @proveedores_bp.route('/eliminar_proveedor/<int:id>', methods=['POST'])
+@login_required
+@rol_requerido('admin')
 def eliminar_proveedor(id):
     proveedor = sesion.query(Proveedor).filter_by(id=id).first()
 
@@ -65,17 +96,16 @@ def eliminar_proveedor(id):
         try:
             productos_asociados = sesion.query(Producto).filter_by(proveedor_id=id).count()
             if productos_asociados > 0:
-                flash('No se puede eliminar el proveedor porque tiene productos asociados.')
-                return redirect(url_for('proveedores.proveedores'))
+                flash('No se puede eliminar el proveedor porque tiene productos asociados.', 'warning')
+                return redirect(url_for('proveedores.listar_proveedores'))
 
             sesion.delete(proveedor)
             sesion.commit()
-            flash('Proveedor eliminado correctamente.')
+            flash('Proveedor eliminado correctamente.', 'success')
         except Exception as e:
             sesion.rollback()
-            flash(f'Error al eliminar proveedor: {str(e)}')
+            flash(f'Error al eliminar proveedor: {str(e)}', 'danger')
     else:
-        flash('Proveedor no encontrado.')
+        flash('Proveedor no encontrado.', 'warning')
 
-    return redirect(url_for('proveedores.proveedores'))
-
+    return redirect(url_for('proveedores.listar_proveedores'))
