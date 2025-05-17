@@ -2,30 +2,40 @@
 {% block content %}
 <div class="container mt-4">
     <h1>Lista de Productos</h1>
+    <div class="botones-superiores">
+        <a href="{{ url_for('productos.nuevo_producto') }}" class="btn btn-add">➕ Añadir Producto</a>
+        <a href="#form-busqueda-producto" class="btn btn-add">🔎 Buscar</a>
+    </div>
+    <div class="alerta-orden">
+      📌 Puedes ordenar por <strong>ID</strong>, <strong>Nombre</strong> o <strong>Precio</strong>, y buscar por nombre o descripción.
+    </div>
 
-    <a href="{{ url_for('productos.nuevo_producto') }}" class="btn btn-add">➕ Añadir Producto</a>
 
-    <table>
-        <thead>
+    <div class ="tabla-responive">
+        <table class="tabla-estilizada">
+            <thead>
             {% set nueva_direccion = 'desc' if direccion == 'asc' else 'asc' %}
 
-            <tr>
-                <th><a href="{{ url_for('productos.ver_productos', orden='id', direccion=nueva_direccion) }}">ID
-                </a></th>
-                <th><a href="{{ url_for('productos.ver_productos', orden='nombre', direccion=nueva_direccion) }}">Nombre
-                    {% if orden == 'nombre' %}
-                        {% if direccion == 'asc' %} ↑ {% else %} ↓ {% endif %}
-                    {% endif %}
-                </a></th>
-                <th>Descripción</th>
-                <th><a href="{{ url_for('productos.ver_productos', orden='precio', direccion=nueva_direccion) }}">Precio</a></th>
-                <th>Stock</th>
-                <th><a href="{{ url_for('productos.ver_productos', orden='proveedor', direccion=nueva_direccion) }}">Proveedor</a></th>
-                <th>Acciones</th>
-            </tr>
+                <tr>
+                    <th class="col-id"><a href="{{ url_for('productos.ver_productos', orden='id', direccion=nueva_direccion) }}">ID
+                    </a></th>
+                    <th><a href="{{ url_for('productos.ver_productos', orden='nombre', direccion=nueva_direccion) }}">Nombre
+                        {% if orden == 'nombre' %}
+                            {% if direccion == 'asc' %} ↑ {% else %} ↓ {% endif %}
+                        {% endif %}
+                    </a></th>
+                    <th>Descripción</th>
+                    <th><a href="{{ url_for('productos.ver_productos', orden='precio', direccion=nueva_direccion) }}">Precio
+                        {% if orden == 'precio' %}
+                            {% if direccion == 'asc' %} ↑ {% else %} ↓ {% endif %}
+                        {% endif %}
+                    </a></th>
+                    <th class="col-stock">Stock</th>
+                    <th class="col-acciones">Acciones</th>
+                </tr>
 
 
-        </thead>
+            </thead>
         <tbody>
         {% for producto in productos %}
             <tr>
@@ -34,16 +44,35 @@
                 <td>{{ producto.descripcion }}</td>
                 <td>{{ producto.precio }}</td>
                 <td>{{ producto.stock }}</td>
-                <td>{{ producto.proveedor.nombre }}</td>
                 <td>
-                    <a href="{{ url_for('productos.editar_producto', id=producto.id) }}" class="btn btn-edit">✏️ Editar</a>
+                    <a href="{{ url_for('productos.editar_producto', id=producto.id) }}" class="btn-edit">✏️ Editar</a>
                     <form method="POST" action="{{ url_for('productos.eliminar_producto', id=producto.id) }}" class="form-delete">
-                        <button type="submit" onclick="return confirm('¿Eliminar este producto?');">🗑️ Eliminar</button>
+                        <button type="submit" class="btn-delete" onclick="return confirm('¿Eliminar este producto?');">🗑️ Eliminar</button>
                     </form>
                 </td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+    </div>
+
+    <div class="paginacion">
+      {% if hay_anterior %}
+        <a href="{{ url_for('productos.ver_productos', pagina=pagina-1, orden=orden, direccion=direccion) }}" class="btn-pagina">⬅️ Anterior</a>
+      {% endif %}
+
+      <span style="margin: 0 10px;">Página {{ pagina }}</span>
+
+      {% if hay_siguiente %}
+        <a href="{{ url_for('productos.ver_productos', pagina=pagina+1, orden=orden, direccion=direccion) }}" class="btn-pagina">Siguiente ➡️</a>
+      {% endif %}
+    </div>
+    <form method="GET" action="{{ url_for('productos.ver_productos') }}" class="mt-3" id="form-busqueda-producto">
+        <input type="text" name="nombre" placeholder="Buscar por nombre o descripción" value="{{ request.args.get('nombre', '') }}">
+        <button type="submit" class="btn">Buscar</button>
+    </form>
+
+
+
 </div>
 {% endblock %}

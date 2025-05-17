@@ -10,26 +10,48 @@ ventas_bp = Blueprint("ventas", __name__)
 @ventas_bp.route("/ventas")
 @login_required
 def ventas():
-    # Obtener los parámetros de búsqueda (si existen)
     cliente = request.args.get("cliente")
     pagado = request.args.get("pagado")
+    pagina = int(request.args.get("pagina", 1))
+    orden = request.args.get("orden", "id")
+    direccion = request.args.get("direccion", "desc")
+    por_pagina = 30
 
-    # Empezar con la consulta base
-    query = sesion.query(Venta)  # Usamos sesion.query en lugar de Venta.query
+    query = sesion.query(Venta).join(Cliente)
 
-    # Si se pasa un nombre de cliente, filtramos las ventas que corresponden a ese cliente
     if cliente:
-        query = query.join(Cliente).filter(Cliente.nombre.ilike(f"%{cliente}%"))
-
-    # Si se pasa un estado de pago, filtramos las ventas según el estado (0 o 1)
+        query = query.filter(Cliente.nombre.ilike(f"%{cliente}%"))
     if pagado in ["0", "1"]:
         query = query.filter(Venta.pagado == bool(int(pagado)))
 
-    # Ejecutamos la consulta
-    ventas = query.order_by(Venta.id.desc()).all()   # Ordena por ID de mayor a menor
+    def aplicar_orden(campo):
+        return campo.desc() if direccion == "desc" else campo.asc()
 
-    # Renderizamos la plantilla con las ventas obtenidas
-    return render_template("ventas/ventas.html", ventas=ventas)
+    if orden == "cliente":
+        query = query.order_by(aplicar_orden(Cliente.nombre))
+    elif orden == "fecha":
+        query = query.order_by(aplicar_orden(Venta.fecha))
+    else:
+        query = query.order_by(aplicar_orden(Venta.id))
+
+    total_ventas = query.count()
+    ventas = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+
+    hay_anterior = pagina > 1
+    hay_siguiente = (pagina * por_pagina) < total_ventas
+
+    return render_template("ventas/ventas.html",
+        ventas=ventas,
+        pagina=pagina,
+        hay_anterior=hay_anterior,
+        hay_siguiente=hay_siguiente,
+        cliente=cliente,
+        pagado=pagado,
+        orden=orden,
+        direccion=direccion
+    )
+
+
 
 
 
@@ -132,6 +154,7 @@ def ver_detalle_venta(venta_id):
     for detalle in detalles:
         producto = sesion.query(Producto).get(detalle.producto_id)
         productos.append({
+            "id": detalle.id,
             "nombre": producto.nombre,
             "cantidad": detalle.cantidad,
             "precio": detalle.precio_unitario  # Usamos el precio_unitario del detalle
@@ -242,3 +265,62 @@ def ventas_por_mes():
     except Exception as e:
         print("Error en ventas_por_mes:", e)
         return jsonify({"error": str(e)}), 500
+
+
+@ventas_bp.route('/ventas/eliminar/<int:venta_id>', methods=['POST'])
+@login_required
+@rol_requerido('admin')
+def eliminar_venta(venta_id):
+    venta = sesion.query(Venta).get(venta_id)
+    if not venta:
+        flash("Venta no encontrada", "error")
+        return redirect(url_for("ventas.ventas"))
+
+    # Eliminar los detalles asociados primero si existe relación
+    for detalle in venta.detalles:
+        sesion.delete(detalle)
+
+    sesion.delete(venta)
+    sesion.commit()
+    flash("Venta eliminada correctamente 🧨", "success")
+    return redirect(url_for("ventas.ventas"))
+
+
+@ventas_bp.route('/ventas/eliminar_producto/<int:detalle_id>', methods=['POST'])
+@login_required
+@rol_requerido('admin')
+def eliminar_producto(detalle_id):
+    detalle = sesion.query(DetalleVenta).get(detalle_id)
+    if not detalle:
+        flash("Producto no encontrado en la venta", "error")
+        return redirect(url_for("ventas.ventas"))
+
+    venta_id = detalle.venta_id  # para redirigir de vuelta a la factura
+    sesion.delete(detalle)
+    sesion.commit()
+    flash("Producto eliminado de la venta 🗑️", "success")
+    return redirect(url_for("ventas.ver_detalle_venta", venta_id=venta_id))
+
+
+@ventas_bp.route('/ventas/editar_producto/<int:detalle_id>', methods=['GET', 'POST'])
+@login_required
+@rol_requerido('admin')
+def editar_producto(detalle_id):
+    detalle = sesion.query(DetalleVenta).get(detalle_id)
+    if not detalle:
+        flash("Detalle de venta no encontrado.", "error")
+        return redirect(url_for("ventas.ventas"))
+
+    producto = sesion.query(Producto).get(detalle.producto_id)
+
+    if request.method == 'POST':
+        nueva_cantidad = int(request.form['cantidad'])
+        nuevo_precio = float(request.form['precio_unitario'])
+        detalle.cantidad = nueva_cantidad
+        detalle.precio_unitario = nuevo_precio
+        detalle.subtotal = nueva_cantidad * nuevo_precio
+        sesion.commit()
+        flash("Producto de la venta actualizado correctamente ✅", "success")
+        return redirect(url_for('ventas.ver_detalle_venta', venta_id=detalle.venta_id))
+
+    return render_template("ventas/editar_producto_venta.html", detalle=detalle, producto=producto)

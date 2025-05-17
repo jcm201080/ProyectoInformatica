@@ -1,22 +1,26 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from db import sesion, Producto, Proveedor, login_required, rol_requerido
-
-from routes.clientes import clientes
+from db import sesion, Producto, login_required, rol_requerido
 
 productos_bp = Blueprint('productos', __name__)
 
-#Nota ver_producto es la principal, y productos la de añadir los productos, debo cambiarla
-
-#Acceso a todos los usuarios que estan registrados
+# Vista principal de productos para usuarios registrados
 @productos_bp.route('/productos')
 @login_required
 def ver_productos():
     orden = request.args.get("orden", "id")
     direccion = request.args.get("direccion", "asc")
+    nombre = request.args.get("nombre", "")
+    pagina = int(request.args.get("pagina", 1))
+    por_pagina = 30
 
     query = sesion.query(Producto)
 
-    # Función auxiliar para aplicar dirección
+    if nombre:
+        query = query.filter(
+            (Producto.nombre.ilike(f"%{nombre}%")) |
+            (Producto.descripcion.ilike(f"%{nombre}%"))
+        )
+
     def aplicar_direccion(campo):
         return campo.desc() if direccion == "desc" else campo.asc()
 
@@ -24,24 +28,35 @@ def ver_productos():
         query = query.order_by(aplicar_direccion(Producto.nombre))
     elif orden == "precio":
         query = query.order_by(aplicar_direccion(Producto.precio))
-    elif orden == "proveedor":
-        from db import Proveedor
-        query = query.join(Producto.proveedor).order_by(aplicar_direccion(Proveedor.nombre))
     else:
         query = query.order_by(aplicar_direccion(Producto.id))
 
-    productos = query.all()
-    return render_template("producto/productos.html", productos=productos, orden=orden, direccion=direccion)
+    total_productos = query.count()
+    productos = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+
+    hay_anterior = pagina > 1
+    hay_siguiente = (pagina * por_pagina) < total_productos
+
+    return render_template(
+        "producto/productos.html",
+        productos=productos,
+        orden=orden,
+        direccion=direccion,
+        nombre=nombre,
+        pagina=pagina,
+        hay_anterior=hay_anterior,
+        hay_siguiente=hay_siguiente
+    )
 
 
 
-#Solo pueden añadir nuevos productos los adminitradores
+# Formulario para crear un nuevo producto (solo administradores)
 @productos_bp.route('/nuevo_producto')
 @rol_requerido('admin')
 def nuevo_producto():
-    proveedores = sesion.query(Proveedor).all()
-    return render_template('producto/nuevo_producto.html', proveedores=proveedores)
+    return render_template('producto/nuevo_producto.html')
 
+# Procesamiento del formulario de nuevo producto
 @productos_bp.route('/add_product', methods=['POST'])
 @rol_requerido('admin')
 def add_product():
@@ -49,17 +64,12 @@ def add_product():
     descripcion = request.form['descripcion']
     precio = request.form['precio']
     stock = request.form['stock']
-    proveedor_id = request.form['proveedor_id']
-
-    if proveedor_id == "nuevo":
-        return redirect(url_for('proveedores.proveedores'))  # Redirige para crear un proveedor
 
     nuevo_producto = Producto(
         nombre=nombre,
         descripcion=descripcion,
         precio=precio,
-        stock=stock,
-        proveedor_id=int(proveedor_id)
+        stock=stock
     )
 
     try:
@@ -72,8 +82,7 @@ def add_product():
 
     return redirect(url_for('productos.nuevo_producto'))
 
-
-
+# Edición de producto (solo administradores)
 @productos_bp.route('/editar_producto/<int:id>', methods=['GET', 'POST'])
 @rol_requerido('admin')
 def editar_producto(id):
@@ -88,14 +97,19 @@ def editar_producto(id):
         producto.descripcion = request.form['descripcion']
         producto.precio = float(request.form['precio'])
         producto.stock = int(request.form['stock'])
-        producto.proveedor_id = int(request.form['proveedor_id'])
         producto.cantidad_total = int(request.form['cantidad_total'])
 
-        sesion.commit()
-        flash('Producto actualizado correctamente.')
+        try:
+            sesion.commit()
+            flash('Producto actualizado correctamente.')
+        except Exception as e:
+            sesion.rollback()
+            flash(f'Error al actualizar producto: {str(e)}')
+
         return redirect(url_for('productos.ver_productos'))
 
     return render_template('producto/editar_producto.html', producto=producto)
+
 
 @productos_bp.route('/eliminar_producto/<int:id>', methods=['POST'])
 @rol_requerido('admin')
@@ -121,12 +135,5 @@ def verificar_stock_bajo():
 
             if porcentaje < 10:
                 flash(f'¡Atención! El producto "{producto.nombre}" tiene menos del 10% de stock.', 'warning')
-
-
-
-
-
-
-
 
 

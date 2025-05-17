@@ -1,7 +1,6 @@
-/* Estilos generales del body */
-/* General body styles */
+/* 🌐 GENERAL: Estructura base del sitio */
 html, body {
-    height: 100%; /* Asegura que el body use el alto completo */
+    height: 100%;
     margin: 0;
     padding: 0;
     font-family: Arial, sans-serif;
@@ -9,8 +8,6 @@ html, body {
     text-align: center;
 }
 
-/* Envoltura principal para asegurar footer al fondo */
-/* Main wrapper to keep footer at the bottom */
 .wrapper {
     display: flex;
     flex-direction: column;
@@ -22,16 +19,19 @@ main {
     padding: 20px;
 }
 
-/* Encabezado */
-/* Header */
+.container, main {
+    width: 100%;
+    padding: 0;
+    margin: 0 auto;
+}
+
+/* 🎩 HEADER Y NAVEGACIÓN */
 header {
     background: #333;
     color: white;
     padding: 20px;
 }
 
-/* Menú de navegación principal */
-/* Main navigation menu */
 nav ul.menu {
     list-style: none;
     padding: 0;
@@ -40,10 +40,6 @@ nav ul.menu {
     flex-wrap: wrap;
     justify-content: center;
     gap: 10px;
-}
-
-nav ul.menu li {
-    display: flex;
 }
 
 nav ul.menu li a {
@@ -61,37 +57,41 @@ nav ul.menu li a:hover {
 
 nav ul.menu li a.active {
     background-color: #555;
-    color: white;
     font-weight: bold;
 }
 
-/* Formularios */
+.alerta-orden {
+    background-color: #f0f8ff;
+    color: #0c5460;
+    border: 1px solid #b8daff;
+    padding: 6px 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 0.75rem;
+    text-align: center;
+}
+
+
+
+/* 📄 FORMULARIOS */
 form {
     width: 50%;
     margin: 20px auto;
     background: white;
-    padding: 20px;
+    padding: 20px 30px;
     border-radius: 10px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
     text-align: left;
 }
 
 form input, form textarea, form select {
-    margin-bottom: 15px;
-}
-
-label {
-    font-weight: bold;
-    display: block;
-    margin-top: 10px;
-}
-
-input, textarea {
     width: 100%;
     padding: 10px;
     margin-top: 5px;
+    margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    box-sizing: border-box;
     font-size: 16px;
 }
 
@@ -100,11 +100,15 @@ textarea {
     height: 100px;
 }
 
-select {
-    margin-bottom: 15px;
+label {
+    font-weight: bold;
+    display: block;
+    margin-top: 10px;
 }
 
-/* Botones */
+
+
+/* 🎯 BOTONES */
 button, .btn {
     background: #007BFF;
     color: white;
@@ -124,51 +128,128 @@ button:hover, .btn:hover {
     background: #0056b3;
 }
 
-/* Botón adicional para "Agregar" */
 .btn-add {
     background: #371777;
+    margin-bottom: 15px;
 }
 
 .btn-add:hover {
     background: #218838;
 }
 
-/* Botones de eliminar y editar */
-.form-delete {
-    display: inline;
-    background-color: transparent;
-    padding: 0;
-    margin: 0;
-    border: none;
-    max-width: fit-content;
+.btn-cancel {
+    background-color: #dc3545;
 }
 
-.form-delete button,
-.btn-edit {
-    background-color: #007BFF;
+.btn-cancel:hover {
+    background-color: #c82333;
+}
+
+.btn-pagina {
+    background-color: #6c757d;
     color: white;
-    padding: 10px 15px;
-    border: none;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
+    font-size: 14px;
+    padding: 6px 12px;
+    border-radius: 4px;
+    text-decoration: none;
+    margin: 0 5px;
 }
 
-.form-delete button:hover,
+.btn-pagina:hover {
+    background-color: #5a6268;
+}
+
+/* ✏️ EDITAR Y ELIMINAR */
+.btn-edit {
+  display: inline-block;
+  max-width: 100px;
+  background-color: #007BFF;
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1.3;
+  margin: 0;
+  box-shadow: none;
+  width: 100% ;
+  text-align: center;
+  box-sizing: border-box;
+}
+.btn-edit-pagado{
+    background-color: #28a745;
+}
+.btn-edit-no_pagado{
+    background-color: #dc3545;
+}
 .btn-edit:hover {
-    background-color: #0056b3;
+  background-color: #0056b3;
+}
+.form-delete button {
+    background-color: #dc3545;
+    color: white;
+    padding: 4px 10px;
+    font-size: 0.75rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.form-delete {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  width: 100%;
 }
 
-/* Títulos de formularios */
-.form-title {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  line-height: 1.3;
+  margin: 0;
+  box-shadow: none;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  margin-top: 4px;
+  max-width: 100px;
 }
 
-/* Tablas */
-table {
+.btn-delete:hover {
+  background-color: #a71d2a;
+}
+
+
+.form-delete button:hover {
+    background-color: #a71d2a;
+}
+/* Eliminar cualquier efecto no deseado */
+.form-delete,
+.form-delete button,
+.form-delete button:focus,
+.form-delete button:active {
+  outline: none;
+  box-shadow: none;
+  border: none;
+}
+
+
+/* 📊 TABLAS GENERALES */
+table:not(.tabla-estilizada) {
     width: 100%;
     border-collapse: collapse;
     margin: 20px 0;
@@ -176,21 +257,120 @@ table {
     text-align: left;
 }
 
-th, td {
+table:not(.tabla-estilizada) th,
+table:not(.tabla-estilizada) td {
     padding: 12px;
     border: 1px solid #ddd;
 }
 
-th {
+table:not(.tabla-estilizada) th {
     background-color: #f4f4f4;
     font-weight: bold;
 }
 
-tr:nth-child(even) {
+table:not(.tabla-estilizada) tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-/* Alertas tipo flash */
+/* 🌟 TABLAS MODERNAS CON RESPONSIVE */
+.tabla-estilizada {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    table-layout: fixed;
+}
+
+
+.tabla-estilizada .table-acciones {
+  border: none;
+  background: transparent;
+}
+
+
+
+.tabla-estilizada thead {
+    background-color: #343a40;
+    color: white;
+    font-weight: bold;
+}
+
+.tabla-estilizada th,
+.tabla-estilizada td {
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+    max-width: 200px;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.tabla-estilizada tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+
+
+.tabla-estilizada thead th a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.tabla-estilizada thead th a:hover {
+    color: #ffc107;
+}
+
+/* 📱 CONTENEDOR RESPONSIVE PARA TABLAS */
+.tabla-responive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+    padding: 0 10x;
+}
+
+/* 🎨 CLASES ESPECÍFICAS DE COLUMNAS */
+.col-email, .col-direccion, .col-descripcion {
+    max-width: 200px;
+    font-size: 0.85em;
+    word-wrap: break-word;
+    white-space: normal;
+}
+
+.col-fecha, .col-id {
+    max-width: 100px;
+    font-size: 0.9em;
+    white-space: nowrap;
+}
+
+/* ID con ancho limitado */
+.col-id {
+    max-width: 60px;
+    width: 60px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+}
+
+/* Stock con ancho limitado */
+.col-stock {
+    max-width: 80px;
+    width: 80px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Acciones con ancho limitado */
+.col-acciones {
+    max-width: 140px;
+    width: 140px;
+    text-align: center;
+}
+
+/* ✅ ALERTAS */
 .alerta {
     background-color: #f8d7da;
     border: 1px solid #f5c6cb;
@@ -209,17 +389,6 @@ tr:nth-child(even) {
     list-style: none;
 }
 
-/* Footer al pie de página */
-footer {
-    background: #333;
-    color: white;
-    padding: 10px;
-    width: 100%;
-    text-align: center;
-    margin-top: auto;
-}
-
-/* Estilos para mensajes flash */
 .flashes {
     list-style-type: none;
     padding: 0;
@@ -248,7 +417,17 @@ footer {
     border: 1px solid #007700;
 }
 
-/* Estilos responsive */
+/* 🦶 FOOTER */
+footer {
+    background: #333;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    text-align: center;
+    margin-top: auto;
+}
+
+/* 📱 RESPONSIVE MEDIA QUERIES */
 @media screen and (max-width: 600px) {
     button, .btn {
         font-size: 14px;
@@ -270,7 +449,6 @@ footer {
     }
 }
 
-/* Menú responsive para tabletas/móviles */
 @media (max-width: 768px) {
     nav ul.menu {
         flex-direction: column;
@@ -281,5 +459,32 @@ footer {
         width: 100%;
         text-align: center;
     }
+
+    .btn-edit,
+    .form-delete button {
+        font-size: 10px;
+        padding: 6px 10px;
+    }
 }
 
+@media (max-width: 1000px) {
+    .container, main {
+        font-size: 14px;
+    }
+
+    .tabla-estilizada th,
+    .tabla-estilizada td {
+        font-size: 12px;
+        padding: 4px;
+    }
+
+    nav ul.menu li a {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
+
+    .btn, button {
+        font-size: 14px;
+        padding: 8px 10px;
+    }
+}

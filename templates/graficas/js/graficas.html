@@ -7,11 +7,11 @@
 {% block content %}
     <nav>
         <ul class="menu">
-            <li><a href="{{ url_for('graficas_py.graficas_ventas_python') }}" class="{% if request.endpoint == 'graficas_py.graficas_ventas_python' %}active{% endif %}">Gráficas Python</a></li>
+            <li><a href="{{ url_for('graficas_py.graficas_python') }}" class="{% if request.endpoint == 'graficas_py.graficas_ventas_python' %}active{% endif %}">Gráficas Python</a></li>
             <li><a href="{{ url_for('graficas.graficas') }}" class="{% if request.endpoint == 'graficas.graficas' %}active{% endif %}">Gráficas JS</a></li>
         </ul>
     </nav>
-
+    <br>
     <h2>Graficas Java Script</h2>
 <!-- Aquí va el contenido específico de productos -->
     <h3>Stock de productos</h3>

@@ -1,88 +1,94 @@
 {% extends "base.html" %}
-
-{% block title %}Ventas{% endblock %}
-
-{% block header %}Página de Ventas{% endblock %}
-
 {% block content %}
-<h1>Listado de Ventas</h1>
-<a href="{{ url_for('ventas.nueva_venta') }}" class="btn btn-add">➕ Añadir Venta</a>
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Cliente</th>
-            <th>Fecha</th>
-            <th>Total</th>
-            <th>Descuento</th>
-            <th>Total Final</th>
-            <th>Pagado</th>
-            <th>Acción</th> <!-- Nueva columna para ver el detalle de la venta -->
-        </tr>
-    </thead>
-    <tbody>
-        <a href="{{ url_for('ventas.graficas_ventas') }}" class="btn btn-add">Ver Gráficas</a>
-        {% for venta in ventas %}
-        <tr>
-            <td>{{ venta.id }}</td>
-            <td>{{ venta.cliente.nombre }}</td>
-            <td>{{ venta.fecha }}</td>
-            <td>{{ venta.total }}</td>
-            <td>{{ venta.descuento }}</td>
-            <td>{{ venta.total_final }}</td>
-            <td>
-                {% if venta.pagado %}
-                    <button onclick="cambiarEstadoPago({{ venta.id }}, false)">✅ Pagado</button>
-                {% else %}
-                    <button onclick="cambiarEstadoPago({{ venta.id }}, true)">❌ No Pagado</button>
-                {% endif %}
-            </td>
-            <td>
-                <!-- Enlace para ver los detalles de la venta -->
-                <a href="{{ url_for('ventas.ver_detalle_venta', venta_id=venta.id) }}" class="btn">Ver Detalle</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container mt-4">
+    <h1>Listado de Ventas</h1>
+    <a href="{{ url_for('ventas.nueva_venta') }}" class="btn btn-add">➕ Añadir Venta</a>
+    <a href="#form-busqueda" class="btn btn-add">🔎 Buscar</a>
+    <div class="alerta-orden">
+      📌 Puedes ordenar por <strong>ID</strong>, <strong>Cliente</strong> o <strong>Fecha</strong> haciendo clic en los encabezados de la tabla.
+    </div>
 
-<form method="GET" action="{{ url_for('ventas.ventas') }}">
-    <input type="text" name="cliente" placeholder="Buscar por cliente">
-    <select name="pagado">
-        <option value="">-- Estado de pago --</option>
-        <option value="1">Pagado</option>
-        <option value="0">No Pagado</option>
-    </select>
-    <button type="submit">Buscar</button>
-</form>
 
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <ul class="flashes">
-    {% for category, message in messages %}
-      <li class="{{ category }}">{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
 
+    <div class="tabla-responive">
+        <table class="tabla-estilizada">
+            {% set nueva_direccion = 'desc' if direccion == 'asc' else 'asc' %}
+            <thead>
+              <tr>
+                <th class="col-id">
+                  <a href="{{ url_for('ventas.ventas', orden='id', direccion=nueva_direccion, cliente=cliente, pagado=pagado, pagina=pagina) }}">ID</a>
+                </th>
+                <th>
+                  <a href="{{ url_for('ventas.ventas', orden='cliente', direccion=nueva_direccion, cliente=cliente, pagado=pagado, pagina=pagina) }}">Cliente</a>
+                </th>
+                <th>
+                  <a href="{{ url_for('ventas.ventas', orden='fecha', direccion=nueva_direccion, cliente=cliente, pagado=pagado, pagina=pagina) }}">Fecha</a>
+                </th>
+                <th>Total</th>
+                <th>Descuento</th>
+                <th>Total Final</th>
+                <th class="col-acciones">Pagado</th>
+                <th class="col-acciones">Acción</th>
+              </tr>
+            </thead>
+
+            <tbody>
+                {% for venta in ventas %}
+                <tr>
+                    <td>{{ venta.id }}</td>
+                    <td>{{ venta.cliente.nombre }}</td>
+                    <td>{{ venta.fecha }}</td>
+                    <td>{{ venta.total }}</td>
+                    <td>{{ venta.descuento }}</td>
+                    <td>{{ venta.total_final }}</td>
+                    <td>
+                        {% if venta.pagado %}
+                            <button onclick="cambiarEstadoPago({{ venta.id }}, false)" class="btn-edit btn-edit-pagado ">✅ Pagado</button>
+                        {% else %}
+                            <button onclick="cambiarEstadoPago({{ venta.id }}, true)" class="btn-edit btn-edit-no_pagado">❌ No pagdo</button>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('ventas.ver_detalle_venta', venta_id=venta.id) }}" class="btn-edit">🧾 Ver Factura</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="paginacion mt-3">
+      {% if hay_anterior %}
+        <a href="{{ url_for('ventas.ventas', pagina=pagina-1, cliente=cliente, pagado=pagado) }}" class="btn-pagina">⬅️ Anterior</a>
+      {% endif %}
+
+      <span style="margin: 0 10px;">Página {{ pagina }}</span>
+
+      {% if hay_siguiente %}
+        <a href="{{ url_for('ventas.ventas', pagina=pagina+1, cliente=cliente, pagado=pagado) }}" class="btn-pagina">Siguiente ➡️</a>
+      {% endif %}
+    </div>
+
+
+    <form method="GET" action="{{ url_for('ventas.ventas') }}" class="mt-3" id="form-busqueda">
+        <input type="text" name="cliente" placeholder="Buscar por cliente">
+        <select name="pagado">
+            <option value="">-- Estado de pago --</option>
+            <option value="1">Pagado</option>
+            <option value="0">No Pagado</option>
+        </select>
+        <button type="submit">Buscar</button>
+    </form>
+</div>
 
 <script>
     function cambiarEstadoPago(ventaId, nuevoEstado) {
-        // Convertimos `nuevoEstado` a 1 o 0 para el servidor
         const estadoNumerico = nuevoEstado ? 1 : 0;
-
-        fetch(`/cambiar_estado_pago/${ventaId}/${estadoNumerico}`, {
-            method: "POST"
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();  // Recargar la página para ver el cambio
-            } else {
-                alert("Error al actualizar el estado de pago.");
-            }
-        });
+        fetch(`/cambiar_estado_pago/${ventaId}/${estadoNumerico}`, { method: "POST" })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) location.reload();
+                else alert("Error al actualizar el estado de pago.");
+            });
     }
 </script>
 {% endblock %}

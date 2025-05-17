@@ -1,43 +1,70 @@
 {% extends 'base.html' %}
-
-{% block title %}Compras{% endblock %}
-
-{% block header %}Página de Compras{% endblock %}
-
 {% block content %}
-    <h1>Compras</h1>
-<!-- Botón "Añadir" con clase especial -->
-<a href="{{ url_for('compras.nueva_compra') }}" class="btn btn-add">➕ Añadir Compra</a>
-
-<!-- Formulario para añadir nueva Compra -->
-
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Producto Id</th>
-            <th>Proveedor Id</th>
-            <th>Precio</th>
-            <th>Cantidad</th>
-            <th>Total</th>
-            <th>Fecha</th>
-        </tr>
-    </thead>
-    <tbody>
-
-        {% for compra in compras %}
-        <tr>
-            <td>{{ compra.id }}</td>
-            <td>{{ compra.producto.id }}</td>
-            <td>{{ compra.proveedor.id }}</td>
-            <td>{{ compra.precio }}</td>
-            <td>{{ compra.cantidad }}</td>
-            <td>{{ compra.total }}</td>
-            <td>{{ compra.fecha }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+<div class="container mt-4">
+    <h1>Lista de Compras</h1>
+    <div class="botones-superiores">
+        <a href="{{ url_for('compras.nueva_compra') }}" class="btn btn-add">➕ Añadir Compra</a>
+        <a href="#form-busqueda-proveedor" class="btn btn-add">🔎 Buscar</a>
+    </div>
 
 
+    <div class="tabla-responive">
+        <table class="tabla-estilizada">
+            <div class="alerta-orden">
+              📌 Puedes ordenar por <strong>ID</strong>, <strong>Proveedor</strong> o <strong>Fecha</strong> haciendo clic en los encabezados de la tabla.
+            </div>
+
+            {% set nueva_direccion = 'desc' if direccion == 'asc' else 'asc' %}
+
+            <thead>
+              <tr>
+                <th class="col-id">
+                  <a href="{{ url_for('compras.compras', orden='id', direccion=nueva_direccion, pagina=pagina) }}">ID</a>
+                </th>
+                <th>
+                  <a href="{{ url_for('compras.compras', orden='proveedor', direccion=nueva_direccion, pagina=pagina) }}">Proveedor</a>
+                </th>
+                <th>
+                  <a href="{{ url_for('compras.compras', orden='fecha', direccion=nueva_direccion, pagina=pagina) }}">Fecha</a>
+                </th>
+                <th>Total</th>
+                <th class="col-acciones">Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+                {% for compra in compras %}
+                <tr>
+                    <td>{{ compra.id }}</td>
+                    <td>{{ compra.proveedor.nombre }}</td>
+                    <td>{{ compra.fecha }}</td>
+                    <td>{{ compra.total }}</td>
+                    <td>
+                        <a href="{{ url_for('compras.editar_compra', id=compra.id) }}" class="btn-edit">✏️ Editar</a>
+                        <form action="{{ url_for('compras.eliminar_compra', id=compra.id) }}" method="POST" class="form-delete">
+                            <button type="submit" class="btn-delete" onclick="return confirm('¿Eliminar esta compra?');">🗑️ Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="paginacion mt-3">
+      {% if hay_anterior %}
+        <a href="{{ url_for('compras.compras', pagina=pagina-1, orden=orden, direccion=direccion) }}" class="btn-pagina">⬅️ Anterior</a>
+      {% endif %}
+
+      <span style="margin: 0 10px;">Página {{ pagina }}</span>
+
+      {% if hay_siguiente %}
+        <a href="{{ url_for('compras.compras', pagina=pagina+1, orden=orden, direccion=direccion) }}" class="btn-pagina">Siguiente ➡️</a>
+      {% endif %}
+    </div>
+    <form method="GET" action="{{ url_for('compras.compras') }}" class="mt-3" id="form-busqueda-proveedor">
+        <input type="text" name="proveedor" placeholder="Buscar por proveedor" value="{{ proveedor or '' }}">
+        <button type="submit" class="btn">Buscar</button>
+    </form>
+</div>
 {% endblock %}
+

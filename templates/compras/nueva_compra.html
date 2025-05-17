@@ -26,7 +26,8 @@
         <label>Cantidad:</label>
         <input type="number" name="cantidad"><br><br>
 
-        <button type="submit">Registrar Compra</button>
+        <button type="submit" class="btn btn-add">Registrar Compra</button>
+        <a href="{{ url_for('compras.compras') }}" class="btn btn-cancel">Cancelar</a>
     </form>
 {% endblock %}
 

@@ -6,8 +6,46 @@ proveedores_bp = Blueprint('proveedores', __name__)
 @proveedores_bp.route('/proveedores')
 @login_required
 def listar_proveedores():
-    proveedores = sesion.query(Proveedor).all()
-    return render_template('proveedores/proveedor.html', proveedores=proveedores)
+    nombre = request.args.get("nombre")
+    pagina = int(request.args.get("pagina", 1))
+    orden = request.args.get("orden", "id")
+    direccion = request.args.get("direccion", "asc")
+    por_pagina = 30
+
+    query = sesion.query(Proveedor)
+
+    if nombre:
+        query = query.filter(
+            (Proveedor.nombre.ilike(f"%{nombre}%")) |
+            (Proveedor.cif.ilike(f"%{nombre}%"))
+        )
+
+    def aplicar_orden(campo):
+        return campo.desc() if direccion == "desc" else campo.asc()
+
+    if orden == "nombre":
+        query = query.order_by(aplicar_orden(Proveedor.nombre))
+    elif orden == "cif":
+        query = query.order_by(aplicar_orden(Proveedor.cif))
+    else:
+        query = query.order_by(aplicar_orden(Proveedor.id))
+
+    total = query.count()
+    proveedores = query.offset((pagina - 1) * por_pagina).limit(por_pagina).all()
+
+    hay_anterior = pagina > 1
+    hay_siguiente = (pagina * por_pagina) < total
+
+    return render_template("proveedores/proveedor.html",
+        proveedores=proveedores,
+        pagina=pagina,
+        hay_anterior=hay_anterior,
+        hay_siguiente=hay_siguiente,
+        nombre=nombre,
+        orden=orden,
+        direccion=direccion
+    )
+
 
 
 @proveedores_bp.route('/proveedores/nuevo')

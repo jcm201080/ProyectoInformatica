@@ -1,31 +1,51 @@
 {% extends 'base.html' %}
 {% block content %}
-<h2>Factura #{{ venta.id }}</h2>
+<div class="container mt-4">
+    <h2>🧾 Factura #{{ venta.id }}</h2>
 
-<p><strong>Cliente:</strong> {{ venta.cliente.nombre }}</p>
-<p><strong>Fecha:</strong> {{ venta.fecha }}</p>
-<p><strong>Descuento Aplicado:</strong> {{ descuento }}</p>
-<p><strong>Total Final:</strong> {{ total_final }}</p>
+    <p><strong>👤 Cliente:</strong> {{ venta.cliente.nombre }}</p>
+    <p><strong>📅 Fecha:</strong> {{ venta.fecha }}</p>
+    <p><strong>🔖 Descuento Aplicado:</strong> {{ descuento }}</p>
+    <p><strong>💰 Total Final:</strong> {{ total_final }}</p>
 
-<h3>Detalles de la Venta:</h3>
-<table>
-    <thead>
-        <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio Unitario</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for producto in productos %}
-        <tr>
-            <td>{{ producto.nombre }}</td>
-            <td>{{ producto.cantidad }}</td>
-            <td>{{ producto.precio }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+    <h3>🧩 Detalles de la Venta:</h3>
+    <div class="tabla-responive">
+        <table class="tabla-estilizada">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
 
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>{{ producto.id }}</td>
+                    <td>{{ producto.nombre }}</td>
+                    <td>{{ producto.cantidad }}</td>
+                    <td>{{ producto.precio }}</td>
+                    <td class="table-acciones">
+                        <a href="{{ url_for('ventas.editar_producto', detalle_id=producto.id) }}" class="btn-edit">✏️ Editar</a>
+
+                        <form action="{{ url_for('ventas.eliminar_producto', detalle_id=producto.id) }}" method="POST" class="form-delete">
+                            <button type="submit" class="btn-delete" onclick="return confirm('¿Eliminar este producto de la venta?')">🗑️ Eliminar Producto</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <form action="{{ url_for('ventas.eliminar_venta', venta_id=venta.id) }}" method="POST" class="form-delete mt-4">
+        <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro de eliminar toda la venta?')">🧨 Eliminar Factura</button>
+    </form>
+    <a href="{{ url_for('ventas.ventas') }}" class="btn btn-cancel">❌ Cancelar</a>
+</div>
 {% endblock %}
+
 

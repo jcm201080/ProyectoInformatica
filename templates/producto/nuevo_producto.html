@@ -16,17 +16,9 @@
     <input type="number" id="stock" name="stock" required>
 
     <label for="proveedor_id">Proveedor:</label>
-    <select id="proveedor_id" name="proveedor_id" required>
-        <option value="">Seleccione un proveedor</option>
-        {% for proveedor in proveedores %}
-            <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
-        {% endfor %}
-        <option value="nuevo">+ Añadir nuevo proveedor</option>
-    </select>
 
-    <div class="botonera">
-        <button type="submit" class="btn btn-edit">💾 Añadir</button>
+        <button type="submit" class="btn btn-add">💾 Añadir</button>
         <a href="{{ url_for('productos.ver_productos') }}" class="btn btn-cancel">❌ Cancelar</a>
-    </div>
+
 </form>
 {% endblock %}

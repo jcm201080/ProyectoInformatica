@@ -68,5 +68,3 @@ def comparativa_proveedores():
     return jsonify({"proveedores": nombres, "compras": compras, "ventas": ventas})
 
 
-
-

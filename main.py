@@ -1,51 +1,43 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from sqlalchemy.orm import joinedload
-from db import engine, Base, create_user_table, verify_user, sesion, crear_usuarios_por_defecto
+from db import engine, Base, verify_user, sesion, crear_usuarios_por_defecto, Cliente, login_required
 
-
-# Modelos para login
-from db import Cliente
-
-# Decorador personalizado
-from db import login_required
-from routes.graficas_py import graficas_py_bp
-
-# Blueprints (rutas)
+# Importar Blueprints (rutas organizadas)
 from routes.index import index_bp
 from routes.productos import productos_bp
 from routes.proveedores import proveedores_bp
 from routes.clientes import clientes_bp
 from routes.ventas import ventas_bp
 from routes.compras import compras_bp
-from routes.graficas import graficas_bp  # <-- IMPORTACIÓN SOLO DESPUÉS DE DEFINIR TODAS LAS RUTAS
+from routes.graficas import graficas_bp
 from routes.graficas_py import graficas_py_bp
 
-# App Flask
+# 🚀 Crear aplicación Flask
+# ✨ Create the Flask app
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.secret_key = 'clavesecreta'
+app.secret_key = 'clavesecreta'  # Clave para manejar sesiones / Secret key for session handling
 
-# Crear carpeta para la base de datos si no existe
+# 📁 Verificar carpeta de base de datos
+# ✏️ Check if database folder exists, otherwise create it
 DB_DIR = os.path.join(os.path.dirname(__file__), "database")
 if not os.path.exists(DB_DIR):
     os.makedirs(DB_DIR)
 
-# Crear todas las tablas
+# 📊 Crear todas las tablas definidas en los modelos / Create DB tables from models
 Base.metadata.create_all(engine)
 
-# Crear tabla de usuarios si no existe
-create_user_table()
 
-#Crear usuarios y cliente
+
+# 🔓 Crear usuarios por defecto / Create default users (admin and client)
 crear_usuarios_por_defecto()
 
-# Ruta principal
+# 🏠 Ruta principal de inicio / Main homepage route
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Ruta de login
+# 🔐 Ruta de inicio de sesión / Login route
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -64,7 +56,7 @@ def login():
 
     return render_template('login.html')
 
-# Cierre de sesión
+# 🔒 Ruta para cerrar sesión / Logout route
 @app.route('/logout')
 def logout():
     session.pop('usuario', None)
@@ -72,7 +64,7 @@ def logout():
     flash('Has cerrado sesión correctamente', 'info')
     return redirect(url_for('index'))
 
-# Registro de rutas (blueprints)
+# 📍 Registrar todos los Blueprints / Register all route modules
 app.register_blueprint(index_bp)
 app.register_blueprint(productos_bp)
 app.register_blueprint(proveedores_bp)
@@ -82,6 +74,6 @@ app.register_blueprint(compras_bp)
 app.register_blueprint(graficas_bp)
 app.register_blueprint(graficas_py_bp)
 
-# Iniciar la app
+# ▶️ Iniciar la aplicación si este archivo es el principal / Run the app if executed directly
 if __name__ == '__main__':
     app.run(debug=True)

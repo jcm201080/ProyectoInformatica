@@ -1,26 +1,28 @@
-from email.policy import default
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Text, Numeric, Boolean
 from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.sql import func
 from decimal import Decimal
-import sqlite3
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 from flask import session, redirect, url_for, flash, request
+import sqlite3
 
-# 🚀 Configuración de la base de datos
+# 🚀 Configuración de la base de datos / Database configuration
 engine = create_engine('sqlite:///database/productos.db', connect_args={'check_same_thread': False})
 Session = sessionmaker(bind=engine)
 sesion = Session()
 Base = declarative_base()
 
-# 🛠️ Modelos de la base de datos
+# 🔧 MODELOS DE LA BASE DE DATOS / DATABASE MODELS
+
+# ▶️ Categoría de productos / Product category
 class Categoria(Base):
     __tablename__ = "Categoria"
     id = Column(Integer, primary_key=True)
     nombre = Column(String(150), unique=True, nullable=False)
 
+# ▶️ Proveedores / Suppliers
 class Proveedor(Base):
     __tablename__ = "Proveedor"
     id = Column(Integer, primary_key=True)
@@ -28,9 +30,10 @@ class Proveedor(Base):
     contacto = Column(String(150))
     telefono = Column(String(20))
     email = Column(String(150), unique=True)
-    cif = Column(String(20), unique=True, nullable=False)  # Añadido CIF/DNI obligatorio
-    direccion = Column(String(200))                        # Añadida Dirección
+    cif = Column(String(20), unique=True, nullable=False)
+    direccion = Column(String(200))
 
+# ▶️ Productos / Products
 class Producto(Base):
     __tablename__ = "Producto"
     id = Column(Integer, primary_key=True)
@@ -40,13 +43,12 @@ class Producto(Base):
     precio = Column(Numeric(10, 2), nullable=False)
     stock = Column(Integer, default=0)
     cantidad_total = Column(Integer, default=30)
-    proveedor_id = Column(Integer, ForeignKey('Proveedor.id'), nullable=False)
     fecha_creacion = Column(DateTime, default=func.now())
 
     categoria = relationship('Categoria', backref=backref('productos', lazy=True))
-    proveedor = relationship('Proveedor', backref=backref('productos', lazy=True))
     ventas = relationship("DetalleVenta", back_populates="producto")
 
+# ▶️ Clientes / Clients
 class Cliente(Base):
     __tablename__ = "Cliente"
     id = Column(Integer, primary_key=True)
@@ -54,11 +56,11 @@ class Cliente(Base):
     contacto = Column(String(150))
     telefono = Column(String(20))
     email = Column(String(150), unique=True)
-    dni = Column(String(20), unique=True, nullable=False)    # ← Añadido DNI obligatorio
-    direccion = Column(String(200))                         # ← Añadida dirección opcional
+    dni = Column(String(20), unique=True, nullable=False)
+    direccion = Column(String(200))
     ventas = relationship("Venta", back_populates="cliente")
 
-
+# ▶️ Ventas / Sales
 class Venta(Base):
     __tablename__ = "Venta"
     id = Column(Integer, primary_key=True)
@@ -72,6 +74,7 @@ class Venta(Base):
     cliente = relationship("Cliente", back_populates="ventas")
     detalles = relationship("DetalleVenta", back_populates="venta")
 
+# ▶️ Detalle de cada producto en una venta / Sale item detail
 class DetalleVenta(Base):
     __tablename__ = "DetalleVenta"
     id = Column(Integer, primary_key=True)
@@ -84,6 +87,7 @@ class DetalleVenta(Base):
     venta = relationship("Venta", back_populates="detalles")
     producto = relationship("Producto", back_populates="ventas")
 
+# ▶️ Compras a proveedores / Purchases from suppliers
 class Compra(Base):
     __tablename__ = "Compra"
     __table_args__ = {'extend_existing': True}
@@ -99,60 +103,46 @@ class Compra(Base):
     producto = relationship("Producto")
     proveedor = relationship("Proveedor")
 
-# 🚀 Crear las tablas principales en la base de datos
+# 🚪 Crear las tablas al ejecutar / Create tables on script load
 Base.metadata.create_all(engine)
 
-# 🔐 Crear tabla de usuarios (sqlite3 "puro")
-def create_user_table():
-    conn = sqlite3.connect("database/productos.db")
-    cursor = conn.cursor()
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS usuarios (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            usuario TEXT NOT NULL UNIQUE,
-            contrasena TEXT NOT NULL,
-            rol TEXT NOT NULL DEFAULT 'cliente'
-        )
-    ''')
-    conn.commit()
-    conn.close()
+# 🧍 Modelo de Usuario / User model
+class Usuario(Base):
+    __tablename__ = "usuarios"
 
-create_user_table()
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    usuario = Column(String(150), unique=True, nullable=False)
+    contrasena = Column(String(255), nullable=False)  # contraseña hasheada
+    rol = Column(String(50), nullable=False, default="cliente")
 
-# 🔐 Funciones de gestión de usuarios
+
+# 🔐 Registrar nuevo usuario / Register new user
+# Devuelve False si ya existe el usuario / Returns False if username exists
 def register_user(usuario, contrasena, rol='cliente'):
-    conn = sqlite3.connect("database/productos.db")
-    cursor = conn.cursor()
-    try:
-        hashed_pw = generate_password_hash(contrasena)
-        cursor.execute('INSERT INTO usuarios (usuario, contrasena, rol) VALUES (?, ?, ?)', (usuario, hashed_pw, rol))
-        conn.commit()
-    except sqlite3.IntegrityError:
+    existente = sesion.query(Usuario).filter_by(usuario=usuario).first()
+    if existente:
         return False
-    finally:
-        conn.close()
+    hashed_pw = generate_password_hash(contrasena)
+    nuevo = Usuario(usuario=usuario, contrasena=hashed_pw, rol=rol)
+    sesion.add(nuevo)
+    sesion.commit()
     return True
 
-def verify_user(usuario, contrasena):
-    conn = sqlite3.connect("database/productos.db")
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM usuarios WHERE usuario = ?', (usuario,))
-    user = cursor.fetchone()
-    conn.close()
 
-    if user and check_password_hash(user[2], contrasena):
-        return {'id': user[0], 'usuario': user[1], 'rol': user[3]}
+# 🔎 Verificar usuario y contraseña / Verify username and password
+def verify_user(usuario, contrasena):
+    user = sesion.query(Usuario).filter_by(usuario=usuario).first()
+    if user and check_password_hash(user.contrasena, contrasena):
+        return {'id': user.id, 'usuario': user.usuario, 'rol': user.rol}
     return None
 
-def get_user_by_username(usuario):
-    conn = sqlite3.connect("database/productos.db")
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM usuarios WHERE usuario = ?', (usuario,))
-    user = cursor.fetchone()
-    conn.close()
-    return user
 
-# 🎯 Decoradores para proteger rutas en Flask
+# 🔍 Obtener usuario por nombre / Get user by username
+def get_user_by_username(usuario):
+    return sesion.query(Usuario).filter_by(usuario=usuario).first()
+
+
+# 🔒 Decorador para rutas protegidas / Require login to access route
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -162,6 +152,7 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# 🔒 Decorador para roles / Require specific role to access route
 def rol_requerido(rol_permitido):
     def decorador(f):
         @wraps(f)
@@ -177,34 +168,23 @@ def rol_requerido(rol_permitido):
         return funcion_decorada
     return decorador
 
+# 👤 Crear usuarios por defecto / Create default users
+# Se ejecuta desde main.py o desde este script si es principal
 
-# Funcion crear usuario
 def crear_usuarios_por_defecto():
     admin_creado = register_user("jcm", "1234", "admin")
     cliente_creado = register_user("cliente", "1234", "cliente")
 
     if admin_creado:
-        print("✅ Usuario admin creado.")
+        print("\u2705 Usuario admin creado.")
     else:
-        print("⚠️ El usuario admin ya existe.")
+        print("\u26a0\ufe0f El usuario admin ya existe.")
 
     if cliente_creado:
-        print("✅ Usuario cliente creado.")
+        print("\u2705 Usuario cliente creado.")
     else:
-        print("⚠️ El usuario cliente ya existe.")
+        print("\u26a0\ufe0f El usuario cliente ya existe.")
 
-
-# 👤 Crear usuarios por defecto SOLO si ejecutamos db.py directamente
+# ⚡ Ejecutar solo si este archivo se ejecuta directamente / Run only if this file is executed directly
 if __name__ == "__main__":
-    usuario_admin = register_user("jcm", "1234", "admin")
-    usuario_cliente = register_user("cliente", "cliente123", "cliente")
-
-    if usuario_admin:
-        print("Usuario admin creado correctamente.")
-    else:
-        print("El usuario admin ya existe.")
-
-    if usuario_cliente:
-        print("Usuario cliente creado correctamente.")
-    else:
-        print("El usuario cliente ya existe.")
+    crear_usuarios_por_defecto()
