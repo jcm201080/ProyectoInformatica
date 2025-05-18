@@ -3,31 +3,31 @@
 {% block header %}Nueva Compra{% endblock %}
 
 {% block content %}
-    <h2>Registrar Nueva Compra</h2>
+<h2>Registrar Nueva Compra</h2>
     <form method="POST">
 
-        <label>Producto:</label>
-        <select name="producto_id">
-            {% for producto in productos %}
-                <option value="{{ producto.id }}">{{ producto.nombre }}</option>
-            {% endfor %}
-        </select><br><br>
+    <label>Producto:</label>
+    <select name="producto_id">
+    {% for producto in productos %}
+        <option value="{{ producto.id }}">{{ producto.nombre }}</option>
+    {% endfor %}
+    </select><br><br>
 
-        <label>Proveedor:</label>
-        <select name="proveedor_id">
-            {% for proveedor in proveedores %}
-                <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
-            {% endfor %}
-        </select><br><br>
+    <label>Proveedor:</label>
+    <select name="proveedor_id">
+        {% for proveedor in proveedores %}
+            <option value="{{ proveedor.id }}">{{ proveedor.nombre }}</option>
+        {% endfor %}
+    </select><br><br>
 
-        <label>Precio:</label>
-        <input type="number" name="precio" step="0.01"><br><br>
+    <label>Precio:</label>
+    <input type="number" name="precio" step="0.01"><br><br>
 
-        <label>Cantidad:</label>
-        <input type="number" name="cantidad"><br><br>
+    <label>Cantidad:</label>
+    <input type="number" name="cantidad"><br><br>
 
-        <button type="submit" class="btn btn-add">Registrar Compra</button>
-        <a href="{{ url_for('compras.compras') }}" class="btn btn-cancel">Cancelar</a>
-    </form>
+    <button type="submit" class="btn btn-primary">Registrar Compra</button>
+    <a href="{{ url_for('compras.compras') }}" class="btn btn-cancel">Cancelar</a>
+</form>
 {% endblock %}
 

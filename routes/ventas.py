@@ -4,6 +4,12 @@ from sqlalchemy import func
 from db import sesion, Venta, DetalleVenta, Cliente, Producto, login_required, rol_requerido
 from decimal import Decimal
 from routes.productos import productos_bp
+from flask import send_file
+from reportlab.lib.pagesizes import A4
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet
+import io
 
 ventas_bp = Blueprint("ventas", __name__)
 
@@ -324,3 +330,67 @@ def editar_producto(detalle_id):
         return redirect(url_for('ventas.ver_detalle_venta', venta_id=detalle.venta_id))
 
     return render_template("ventas/editar_producto_venta.html", detalle=detalle, producto=producto)
+
+
+
+
+#Facturas pdf
+
+
+@ventas_bp.route('/ventas/factura/<int:id>')
+@login_required
+def descargar_factura(id):
+    venta = sesion.query(Venta).get(id)
+    detalles = venta.detalles
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    elementos = []
+
+    estilos = getSampleStyleSheet()
+
+    # 🧾 Datos de empresa
+    empresa = [
+        "JCM INFORMÁTICA",
+        "Sevilla, 41008",
+        "Tel: 635487063",
+        "Email: jcm201080@gmail.com"
+    ]
+    for linea in empresa:
+        elementos.append(Paragraph(linea, estilos["Normal"]))
+    elementos.append(Spacer(1, 12))
+
+    # 🧾 Datos de la factura
+    elementos.append(Paragraph(f"<strong>Factura N°:</strong> {venta.id}", estilos["Normal"]))
+    elementos.append(Paragraph(f"<strong>Cliente:</strong> {venta.cliente.nombre}", estilos["Normal"]))
+    elementos.append(Paragraph(f"<strong>Fecha:</strong> {venta.fecha.strftime('%d/%m/%Y')}", estilos["Normal"]))
+    elementos.append(Spacer(1, 12))
+
+    # 🧾 Tabla de productos
+    data = [["Producto", "Cantidad", "Precio unitario (€)", "Subtotal (€)"]]
+    for detalle in detalles:
+        fila = [
+            detalle.producto.nombre,
+            detalle.cantidad,
+            f"{detalle.precio_unitario:.2f}",
+            f"{detalle.subtotal:.2f}"
+        ]
+        data.append(fila)
+
+    # Total final
+    data.append(["", "", "Total:", f"{venta.total_final:.2f}"])
+
+    tabla = Table(data, colWidths=[150, 80, 100, 100])
+    tabla.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),
+        ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('BACKGROUND', (0, -1), (-1, -1), colors.lightgrey),
+    ]))
+
+    elementos.append(tabla)
+    doc.build(elementos)
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name=f"factura_{venta.id}.pdf", mimetype='application/pdf')

@@ -139,6 +139,8 @@ button:hover, .btn:hover {
 
 .btn-cancel {
     background-color: #dc3545;
+
+    height: 38px;
 }
 
 .btn-cancel:hover {
@@ -246,7 +248,6 @@ button:hover, .btn:hover {
   box-shadow: none;
   border: none;
 }
-
 
 /* 📊 TABLAS GENERALES */
 table:not(.tabla-estilizada) {

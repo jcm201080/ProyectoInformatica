@@ -1,24 +1,25 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
-    <h1>Editar Compra</h1>
+
+<h1>Editar Compra</h1>
 
     <form method="POST" action="{{ url_for('compras.editar_compra', id=compra.id) }}">
-        <label for="proveedor_id">Proveedor:</label>
-        <select id="proveedor_id" name="proveedor_id" required>
-            {% for proveedor in proveedores %}
+    <label for="proveedor_id">Proveedor:</label>
+    <select id="proveedor_id" name="proveedor_id" required>
+        {% for proveedor in proveedores %}
             <option value="{{ proveedor.id }}" {% if proveedor.id == compra.proveedor_id %}selected{% endif %}>{{ proveedor.nombre }}</option>
-            {% endfor %}
-        </select>
+        {% endfor %}
+    </select>
 
-        <label for="fecha">Fecha:</label>
-        <input type="date" id="fecha" name="fecha" value="{{ compra.fecha.strftime('%Y-%m-%d') if compra.fecha else '' }}" required>
+    <label for="fecha">Fecha:</label>
+    <input type="date" id="fecha" name="fecha" value="{{ compra.fecha.strftime('%Y-%m-%d') if compra.fecha else '' }}" required>
 
-        <label for="total">Total:</label>
-        <input type="number" step="0.01" id="total" name="total" value="{{ compra.total }}" required>
+    <label for="total">Total:</label>
+    <input type="number" step="0.01" id="total" name="total" value="{{ compra.total }}" required>
 
-        <button type="submit" class="btn-edit">💾 Guardar Cambios</button>
-        <a href="{{ url_for('compras.compras') }}" class="btn-cancel">Cancelar</a>
-    </form>
-</div>
+    <button type="submit" class="btn btn-primary">💾 Guardar Cambios</button>
+    <a href="{{ url_for('compras.compras') }}" class="btn btn-cancel">Cancelar</a>
+
+</form>
+
 {% endblock %}

@@ -12,34 +12,29 @@
         {% endif %}
     {% endwith %}
 
-    <form action="{{ url_for('proveedores.editar_proveedor', id=proveedor.id) }}" method="POST">
-        <div class="mb-3">
-            <label for="nombre" class="form-label">Empresa:</label>
-            <input type="text" class="form-control" id="nombre" name="nombre" value="{{ proveedor.nombre }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="cif" class="form-label">CIF/DNI:</label>
-            <input type="text" class="form-control" id="cif" name="cif" value="{{ proveedor.cif }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="contacto" class="form-label">Contacto:</label>
-            <input type="text" class="form-control" id="contacto" name="contacto" value="{{ proveedor.contacto }}">
-        </div>
-        <div class="mb-3">
-            <label for="telefono" class="form-label">Teléfono:</label>
-            <input type="text" class="form-control" id="telefono" name="telefono" value="{{ proveedor.telefono }}">
-        </div>
-        <div class="mb-3">
-            <label for="email" class="form-label">Email:</label>
-            <input type="email" class="form-control" id="email" name="email" value="{{ proveedor.email }}">
-        </div>
-        <div class="mb-3">
-            <label for="direccion" class="form-label">Dirección:</label>
-            <input type="text" class="form-control" id="direccion" name="direccion" value="{{ proveedor.direccion }}">
-        </div>
-        <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        <a href="{{ url_for('proveedores.listar_proveedores') }}" class="btn btn-secondary">Cancelar</a>
-    </form>
+<form action="{{ url_for('proveedores.editar_proveedor', id=proveedor.id) }}" method="POST">
+
+    <label for="nombre" class="form-label">Empresa:</label>
+    <input type="text" class="form-control" id="nombre" name="nombre" value="{{ proveedor.nombre }}" required>
+
+    <label for="cif" class="form-label">CIF/DNI:</label>
+    <input type="text" class="form-control" id="cif" name="cif" value="{{ proveedor.cif }}" required>
+
+    <label for="contacto" class="form-label">Contacto:</label>
+    <input type="text" class="form-control" id="contacto" name="contacto" value="{{ proveedor.contacto }}">
+
+    <label for="telefono" class="form-label">Teléfono:</label>
+    <input type="text" class="form-control" id="telefono" name="telefono" value="{{ proveedor.telefono }}">
+
+    <label for="email" class="form-label">Email:</label>
+    <input type="email" class="form-control" id="email" name="email" value="{{ proveedor.email }}">
+
+    <label for="direccion" class="form-label">Dirección:</label>
+    <input type="text" class="form-control" id="direccion" name="direccion" value="{{ proveedor.direccion }}">
+
+    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+    <a href="{{ url_for('proveedores.listar_proveedores') }}" class="btn btn-secondary">Cancelar</a>
+</form>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>

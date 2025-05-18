@@ -7,6 +7,7 @@
     <p><strong>📅 Fecha:</strong> {{ venta.fecha }}</p>
     <p><strong>🔖 Descuento Aplicado:</strong> {{ descuento }}</p>
     <p><strong>💰 Total Final:</strong> {{ total_final }}</p>
+    <a href="{{ url_for('ventas.descargar_factura', id=venta.id) }}" class="btn btn-download">📄 Descargar Factura</a>
 
     <h3>🧩 Detalles de la Venta:</h3>
     <div class="tabla-responive">
@@ -32,7 +33,7 @@
                         <a href="{{ url_for('ventas.editar_producto', detalle_id=producto.id) }}" class="btn-edit">✏️ Editar</a>
 
                         <form action="{{ url_for('ventas.eliminar_producto', detalle_id=producto.id) }}" method="POST" class="form-delete">
-                            <button type="submit" class="btn-delete" onclick="return confirm('¿Eliminar este producto de la venta?')">🗑️ Eliminar Producto</button>
+                            <button type="submit" class="btn-delete" onclick="return confirm('¿Eliminar este producto de la venta?')">🗑️ Producto</button>
                         </form>
                     </td>
                 </tr>
@@ -42,7 +43,7 @@
     </div>
 
     <form action="{{ url_for('ventas.eliminar_venta', venta_id=venta.id) }}" method="POST" class="form-delete mt-4">
-        <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro de eliminar toda la venta?')">🧨 Eliminar Factura</button>
+        <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro de eliminar toda la venta?')">🗑️ Factura</button>
     </form>
     <a href="{{ url_for('ventas.ventas') }}" class="btn btn-cancel">❌ Cancelar</a>
 </div>
