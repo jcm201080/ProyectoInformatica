@@ -427,6 +427,16 @@ table:not(.tabla-estilizada) tr:nth-child(even) {
     border: 1px solid #007700;
 }
 
+/*Imagen*/
+.intro-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 /* 🦶 FOOTER */
 footer {
     background: #333;
@@ -496,5 +506,13 @@ footer {
     .btn, button {
         font-size: 14px;
         padding: 8px 10px;
+    }
+}
+
+/* Opcional: ajustar altura en móviles para evitar que ocupe toda la pantalla */
+@media (max-width: 600px) {
+    .intro-image {
+        max-height: 300px;
+        object-fit: cover;
     }
 }
