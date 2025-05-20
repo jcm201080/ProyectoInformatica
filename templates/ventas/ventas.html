@@ -43,13 +43,13 @@
                     <td>{{ venta.total_final }}</td>
                     <td>
                         {% if venta.pagado %}
-                            <button onclick="cambiarEstadoPago({{ venta.id }}, false)" class="btn-edit btn-edit-pagado ">✅ Pagado</button>
+                            <button onclick="cambiarEstadoPago({{ venta.id }}, false)" class="btn-edit btn-edit-pagado ">✅<span class="texto-btn">Pagado</button>
                         {% else %}
-                            <button onclick="cambiarEstadoPago({{ venta.id }}, true)" class="btn-edit btn-edit-no_pagado">❌ No pagdo</button>
+                            <button onclick="cambiarEstadoPago({{ venta.id }}, true)" class="btn-edit btn-edit-no_pagado">❌<span class="texto-btn">No pagdo</button>
                         {% endif %}
                     </td>
                     <td>
-                        <a href="{{ url_for('ventas.ver_detalle_venta', venta_id=venta.id) }}" class="btn-edit">🧾 Ver Factura</a>
+                        <a href="{{ url_for('ventas.ver_detalle_venta', venta_id=venta.id) }}" class="btn-edit">🧾<span class="texto-btn texto-btn-borrar">Ver </span><span class="texto-btn"> Factura</span></a>
                     </td>
                 </tr>
                 {% endfor %}

@@ -448,28 +448,49 @@ footer {
 }
 
 /* 📱 RESPONSIVE MEDIA QUERIES */
+/* 📱 RESPONSIVE - Pantallas pequeñas: hasta 600px */
 @media screen and (max-width: 600px) {
-    button, .btn {
+
+    /* General */
+    html, body {
         font-size: 14px;
-        padding: 8px 10px;
     }
 
+    /* Botones generales */
+    button, .btn {
+        font-size: 12px;
+        padding: 6px 8px;
+    }
+    /*Eliminar texto*/
+    .texto-btn {
+    font-size: 8px;
+    }
+    .texto-btn-borrar{
+    display: none;
+    }
+
+    /* Formularios */
     form {
         width: 90%;
         padding: 15px;
     }
 
-    table {
-        font-size: 14px;
+    /* Tablas */
+    table, .tabla-estilizada {
+        font-size: 12px;
     }
 
+    .tabla-estilizada th,
+    .tabla-estilizada td {
+        padding: 6px;
+    }
+
+    /* Menú de navegación */
     nav ul.menu li a {
-        padding: 8px 10px;
-        font-size: 14px;
+        padding: 6px 8px;
+        font-size: 12px;
     }
-}
 
-@media (max-width: 768px) {
     nav ul.menu {
         flex-direction: column;
         align-items: stretch;
@@ -480,14 +501,68 @@ footer {
         text-align: center;
     }
 
+    /* Columnas específicas */
+    .col-id {
+        width: 25px;
+        max-width: 35px;
+        font-size: 0.60rem ;
+        padding: 4px ;
+        text-align: center;
+    }
+
+    .col-stock {
+        width: 36px ;
+        max-width: 40px ;
+        font-size: 0.6rem ;
+        padding: 4px !important;
+        text-align: center;
+    }
+
+    .col-acciones {
+        width: 63px;
+        max-width: 50px ;
+        padding: 4px ;
+        text-align: center;
+    }
+
+    /* Botones compactos */
+    .btn-edit,
+    .btn-delete {
+        font-size: 10px !important;
+        padding: 3px 4px !important;
+    }
+
+    .form-delete button {
+        font-size: 10px !important;
+        padding: 3px 4px !important;
+    }
+}
+
+/* 🖥️ RESPONSIVE - Tablets: hasta 768px */
+@media screen and (max-width: 768px) {
+
+    nav ul.menu {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    nav ul.menu li a {
+        width: 100%;
+        text-align: center;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
     .btn-edit,
     .form-delete button {
-        font-size: 10px;
+        font-size: 11px;
         padding: 6px 10px;
     }
 }
 
-@media (max-width: 1000px) {
+/* 🖥️ RESPONSIVE - Portátiles: hasta 1000px */
+@media screen and (max-width: 1000px) {
+
     .container, main {
         font-size: 14px;
     }
@@ -509,10 +584,5 @@ footer {
     }
 }
 
-/* Opcional: ajustar altura en móviles para evitar que ocupe toda la pantalla */
-@media (max-width: 600px) {
-    .intro-image {
-        max-height: 300px;
-        object-fit: cover;
-    }
-}
+
+

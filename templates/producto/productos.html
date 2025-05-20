@@ -47,7 +47,7 @@
                 <td>
                     <a href="{{ url_for('productos.editar_producto', id=producto.id) }}" class="btn-edit">✏️ Editar</a>
                     <form method="POST" action="{{ url_for('productos.eliminar_producto', id=producto.id) }}" class="form-delete">
-                        <button type="submit" class="btn-delete" onclick="return confirm('¿Eliminar este producto?');">🗑️ Eliminar</button>
+                        <button type="submit" class="btn-delete" onclick="return confirm('¿Eliminar este producto?');">🗑️<span class="texto-btn"> Eliminar</button>
                     </form>
                 </td>
             </tr>

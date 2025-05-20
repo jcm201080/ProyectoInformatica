@@ -46,7 +46,7 @@
                     <td>
                         <a href="{{ url_for('proveedores.editar_proveedor', id=proveedor.id) }}" class="btn-edit">✏️ Editar</a>
                         <form action="{{ url_for('proveedores.eliminar_proveedor', id=proveedor.id) }}" method="POST" class="form-delete">
-                            <button type="submit" onclick="return confirm('¿Eliminar este proveedor?');" class="btn-delete">🗑️ Eliminar</button>
+                            <button type="submit" onclick="return confirm('¿Eliminar este proveedor?');" class="btn-delete">🗑️<span class="texto-btn"> Eliminar</button>
                         </form>
                     </td>
                 </tr>

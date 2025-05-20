@@ -45,9 +45,9 @@
                     <td>{{ cliente.dni }}</td>
                     <td class="col-texto-largo">{{ cliente.direccion }}</td>
                     <td>
-                      <a href="{{ url_for('clientes.editar_cliente', id=cliente.id) }}" class="btn-edit">✏️ Editar</a>
+                      <a href="{{ url_for('clientes.editar_cliente', id=cliente.id) }}" class="btn-edit">✏️ <span class="texto-btn">Editar</a>
                       <form action="{{ url_for('clientes.eliminar_cliente', id=cliente.id) }}" method="POST" class="form-delete">
-                        <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro?')">🗑️ Eliminar</button>
+                        <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro?')" title="Eliminar">🗑️<span class="texto-btn"> Eliminar</button>
                       </form>
                     </td>
                 </tr>
