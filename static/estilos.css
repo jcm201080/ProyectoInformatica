@@ -112,7 +112,7 @@ label {
 button, .btn {
     background: #007BFF;
     color: white;
-    padding: 12px;
+    padding: 8px;
     border: none;
     margin-top: 15px;
     cursor: pointer;
@@ -129,22 +129,21 @@ button:hover, .btn:hover {
 }
 
 .btn-add {
-    background: #371777;
+    background: #418852;
     margin-bottom: 15px;
 }
 
 .btn-add:hover {
-    background: #218838;
+    background: #bae0c2;
 }
 
 .btn-cancel {
-    background-color: #dc3545;
-
+    background-color: #7a262e;
     height: 38px;
 }
 
 .btn-cancel:hover {
-    background-color: #c82333;
+    background-color: #b18a8a;
 }
 
 .btn-pagina {
@@ -183,13 +182,13 @@ button:hover, .btn:hover {
   box-sizing: border-box;
 }
 .btn-edit-pagado{
-    background-color: #28a745;
+    background-color: #5c7f65;
 }
 .btn-edit-no_pagado{
-    background-color: #dc3545;
+    background-color: #a64343;
 }
 .btn-edit:hover {
-  background-color: #0056b3;
+  background-color: #698aac;
 }
 .form-delete button {
     background-color: #dc3545;
@@ -239,6 +238,16 @@ button:hover, .btn:hover {
 .form-delete button:hover {
     background-color: #a71d2a;
 }
+.btn-search {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.btn-search:hover {
+    background-color: #e0a800;
+}
+
+
 /* Eliminar cualquier efecto no deseado */
 .form-delete,
 .form-delete button,

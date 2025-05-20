@@ -4,7 +4,7 @@
     <h1>Lista de Proveedores</h1>
     <div class="botones-superiores">
         <a href="{{ url_for('proveedores.formulario_proveedor') }}" class="btn btn-add">➕ Añadir Proveedor</a>
-        <a href="#form-busqueda-proveedor" class="btn btn-add">🔎 Buscar</a>
+        <a href="#form-busqueda-proveedor" class="btn btn-add btn-search">🔎 Buscar</a>
     </div>
     <div class="alerta-orden">
       📌 Puedes ordenar por <strong>ID</strong>, <strong>Nombre</strong> o <strong>CIF</strong>, y buscar por nombre o CIF.
@@ -38,10 +38,10 @@
                 <tr>
                     <td >{{ proveedor.id }}</td>
                     <td>{{ proveedor.nombre }}</td>
-                    <td>{{ proveedor.cif }}</td>
                     <td>{{ proveedor.contacto }}</td>
                     <td>{{ proveedor.telefono }}</td>
                     <td class="col-email">{{ proveedor.email }}</td>
+                    <td>{{ proveedor.cif }}</td>
                     <td>{{ proveedor.direccion }}</td>
                     <td>
                         <a href="{{ url_for('proveedores.editar_proveedor', id=proveedor.id) }}" class="btn-edit">✏️ Editar</a>
@@ -69,7 +69,5 @@
         <input type="text" name="nombre" placeholder="Buscar por nombre o CIF" value="{{ nombre or '' }}">
         <button type="submit" class="btn">Buscar</button>
     </form>
-
-
 </div>
 {% endblock %}

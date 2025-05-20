@@ -17,9 +17,8 @@
     <label for="precio_unitario">Precio Unitario:</label>
     <input type="number" id="precio_unitario" name="precio_unitario" step="0.01" value="{{ detalle.precio_unitario }}" required>
 
-    <div class="botonera">
-        <button type="submit" class="btn btn-edit">💾 Guardar</button>
-        <a href="{{ url_for('ventas.ver_detalle_venta', venta_id=detalle.venta_id) }}" class="btn btn-cancel">❌ Cancelar</a>
-    </div>
+    <button type="submit" class="btn btn-primary">💾 Guardar</button>
+    <a href="{{ url_for('ventas.ver_detalle_venta', venta_id=detalle.venta_id) }}" class="btn btn-cancel">❌ Cancelar</a>
+
 </form>
 {% endblock %}

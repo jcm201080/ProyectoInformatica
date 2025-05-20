@@ -18,7 +18,7 @@
                     <th>Producto</th>
                     <th>Cantidad</th>
                     <th>Precio Unitario</th>
-                    <th>Acciones</th>
+                    <th class="col-acciones">Acciones</th>
                 </tr>
             </thead>
 
@@ -29,7 +29,7 @@
                     <td>{{ producto.nombre }}</td>
                     <td>{{ producto.cantidad }}</td>
                     <td>{{ producto.precio }}</td>
-                    <td class="table-acciones">
+                    <td>
                         <a href="{{ url_for('ventas.editar_producto', detalle_id=producto.id) }}" class="btn-edit">✏️ Editar</a>
 
                         <form action="{{ url_for('ventas.eliminar_producto', detalle_id=producto.id) }}" method="POST" class="form-delete">
@@ -43,7 +43,7 @@
     </div>
 
     <form action="{{ url_for('ventas.eliminar_venta', venta_id=venta.id) }}" method="POST" class="form-delete mt-4">
-        <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro de eliminar toda la venta?')">🗑️ Factura</button>
+        <button type="submit" onclick="return confirm('¿Estás seguro de eliminar toda la venta?')">🗑️Eliminar Factura</button>
     </form>
     <a href="{{ url_for('ventas.ventas') }}" class="btn btn-cancel">❌ Cancelar</a>
 </div>

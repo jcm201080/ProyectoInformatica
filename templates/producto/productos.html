@@ -4,7 +4,7 @@
     <h1>Lista de Productos</h1>
     <div class="botones-superiores">
         <a href="{{ url_for('productos.nuevo_producto') }}" class="btn btn-add">➕ Añadir Producto</a>
-        <a href="#form-busqueda-producto" class="btn btn-add">🔎 Buscar</a>
+        <a href="#form-busqueda-producto" class="btn btn-add btn-search">🔎 Buscar</a>
     </div>
     <div class="alerta-orden">
       📌 Puedes ordenar por <strong>ID</strong>, <strong>Nombre</strong> o <strong>Precio</strong>, y buscar por nombre o descripción.
@@ -56,7 +56,7 @@
     </table>
     </div>
 
-    <div class="paginacion">
+    <div class="paginacion mt-3">
       {% if hay_anterior %}
         <a href="{{ url_for('productos.ver_productos', pagina=pagina-1, orden=orden, direccion=direccion) }}" class="btn-pagina">⬅️ Anterior</a>
       {% endif %}

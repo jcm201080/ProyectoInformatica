@@ -5,7 +5,7 @@
 
     <div class="botones-superiores">
         <a href="{{ url_for('clientes.agregar_cliente') }}" class="btn btn-add">➕ Añadir Cliente</a>
-        <a href="#form-busqueda-cliente" class="btn btn-add">🔎 Buscar</a>
+        <a href="#form-busqueda-cliente" class="btn btn-add btn-search">🔎 Buscar</a>
     </div>
     <div class="alerta-orden">
       📌 Puedes ordenar por <strong>ID</strong>, <strong>Nombre</strong> o <strong>Apellidos</strong>, y buscar por nombre o apellidos.
@@ -50,10 +50,6 @@
                         <button type="submit" class="btn-delete" onclick="return confirm('¿Estás seguro?')">🗑️ Eliminar</button>
                       </form>
                     </td>
-
-
-
-
                 </tr>
                 {% endfor %}
             </tbody>
