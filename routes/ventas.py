@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from sqlalchemy.dialects.mysql import DECIMAL
 from sqlalchemy import func
-from db import sesion, Venta, DetalleVenta, Cliente, Producto, login_required, rol_requerido
+from db import sesion, Venta, DetalleVenta, Cliente, Producto, login_required, rol_requerido, Ubicacion, StockPorUbicacion
 from decimal import Decimal
 from routes.productos import productos_bp
 from flask import send_file
@@ -9,7 +9,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
-import io
+
 
 ventas_bp = Blueprint("ventas", __name__)
 
@@ -58,35 +58,42 @@ def ventas():
     )
 
 
-
-
-
-
-
 @ventas_bp.route("/nueva_venta", methods=["GET", "POST"])
 @rol_requerido('admin')
 def nueva_venta():
     clientes = sesion.query(Cliente).all()
     productos = sesion.query(Producto).all()
+    ubicaciones = sesion.query(Ubicacion).all()
 
     if request.method == "POST":
         cliente_id = request.form["cliente_id"]
         productos_ids = request.form.getlist("producto_id[]")
+        ubicacion_id = int(request.form["ubicacion_id"])  # ✅ convertir a int
         cantidades = request.form.getlist("cantidad[]")
         descuento = float(request.form.get("descuento", 0.0))
-
         total = 0
         detalles = []
 
-        # Validar si el stock es suficiente antes de proceder
+        # Validar stock por ubicación
         for i in range(len(productos_ids)):
             producto = sesion.query(Producto).get(productos_ids[i])
             cantidad = int(cantidades[i])
 
-            # Verificar si hay suficiente stock
-            if producto.stock < cantidad:
-                flash(f"No hay suficiente stock de {producto.nombre}. Solo quedan {producto.stock} unidades.", "error")
-                return redirect(url_for("ventas.nueva_venta"))  # Redirigir al formulario de venta
+            # Verificar si hay suficiente stock en esa ubicación
+            stock_ubicacion = sesion.query(StockPorUbicacion).filter_by(
+                producto_id=producto.id,
+                ubicacion_id=ubicacion_id
+            ).first()
+
+            if not stock_ubicacion or stock_ubicacion.cantidad < cantidad:
+                flash(f"No hay suficiente stock de {producto.nombre} en esta ubicación. Solo quedan {stock_ubicacion.cantidad if stock_ubicacion else 0} unidades.", "error")
+                return redirect(url_for("ventas.nueva_venta"))
+
+            # Restar del stock de la ubicación
+            stock_ubicacion.cantidad -= cantidad
+
+            # Opcional: actualizar también el stock total
+            producto.stock -= cantidad
 
             precio_unitario = producto.precio
             subtotal = cantidad * precio_unitario
@@ -99,19 +106,20 @@ def nueva_venta():
                 "subtotal": subtotal
             })
 
-            # Restar del stock
-            print(f"Restando {cantidad} unidades de {producto.nombre} (stock antes: {producto.stock})")
-            producto.stock -= cantidad
-            print(f"Nuevo stock de {producto.nombre}: {producto.stock}")  # Verificar el stock actualizado
-
         total_final = total * (1 - Decimal(descuento) / 100)
 
         # Crear la venta
-        nueva_venta = Venta(cliente_id=cliente_id, total=total, descuento=descuento, total_final=total_final)
+        nueva_venta = Venta(
+            cliente_id=cliente_id,
+            ubicacion_id=ubicacion_id,
+            total=total,
+            descuento=descuento,
+            total_final=total_final
+        )
         sesion.add(nueva_venta)
         sesion.commit()
 
-        # Agregar detalles de la venta
+        # Añadir detalles de venta
         for detalle in detalles:
             det = DetalleVenta(
                 venta_id=nueva_venta.id,
@@ -122,11 +130,12 @@ def nueva_venta():
             )
             sesion.add(det)
 
-        sesion.commit()  # Guardar todo (incluyendo los cambios en el stock)
+        sesion.commit()
         flash("Venta registrada con éxito", "success")
         return redirect(url_for("ventas.ventas"))
 
-    return render_template("ventas/nueva_venta.html", clientes=clientes, productos=productos)
+    return render_template("ventas/nueva_venta.html", clientes=clientes, productos=productos, ubicaciones=ubicaciones)
+
 
 
 #Cambia estado de pago

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>↔️ Mover Producto entre Ubicaciones</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="alerta">
+          <ul>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    {% if producto %}
+    <form method="POST">
+        <p><strong>Producto:</strong> {{ producto.nombre }}</p>
+        <p><strong>Stock actual en Almacén:</strong> {{ stock_actual }}</p>
+
+        <label for="destino_id">Ubicación destino:</label>
+        <select name="destino_id" required>
+            {% for ubicacion in ubicaciones %}
+                {% if ubicacion.nombre != "Almacén" %}
+                    <option value="{{ ubicacion.id }}">{{ ubicacion.nombre }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+
+        <label for="cantidad">Cantidad a mover:</label>
+        <input type="number" name="cantidad" min="1" max="{{ stock_actual }}" required>
+
+        <button type="submit" class="btn">Mover</button>
+        <a href="{{ url_for('almacenes.ver_almacenes') }}" class="btn-cancel">Cancelar</a>
+    </form>
+    {% else %}
+        <p>⚠️ No se ha seleccionado un producto.</p>
+    {% endif %}
+</div>
+{% endblock %}

@@ -9,9 +9,12 @@ from flask import session, redirect, url_for, flash, request
 import sqlite3
 
 # 🚀 Configuración de la base de datos / Database configuration
+# Engine permite a SALAlchemy comunicarse con la base de datos
 engine = create_engine('sqlite:///database/productos.db', connect_args={'check_same_thread': False})
+#Creamos la sesion, lo que nos permite realizar transacciones dentro de la base de datos
 Session = sessionmaker(bind=engine)
 sesion = Session()
+#Esta clase se encarga de mapear la info de las clases en las que hereda y vincular su información a tablas de la base de datos
 Base = declarative_base()
 
 # 🔧 MODELOS DE LA BASE DE DATOS / DATABASE MODELS
@@ -65,6 +68,7 @@ class Venta(Base):
     __tablename__ = "Venta"
     id = Column(Integer, primary_key=True)
     cliente_id = Column(Integer, ForeignKey("Cliente.id"), nullable=False)
+    ubicacion_id = Column(Integer, ForeignKey("Ubicacion.id"))  # NUEVO
     fecha = Column(DateTime, default=func.now())
     total = Column(Numeric(10, 2), nullable=False)
     descuento = Column(Numeric(10, 2), default=Decimal('0.00'))
@@ -73,6 +77,7 @@ class Venta(Base):
 
     cliente = relationship("Cliente", back_populates="ventas")
     detalles = relationship("DetalleVenta", back_populates="venta")
+    ubicacion = relationship("Ubicacion")  # NUEVO
 
 # ▶️ Detalle de cada producto en una venta / Sale item detail
 class DetalleVenta(Base):
@@ -184,6 +189,25 @@ def crear_usuarios_por_defecto():
         print("\u2705 Usuario cliente creado.")
     else:
         print("\u26a0\ufe0f El usuario cliente ya existe.")
+
+
+
+
+#Ubicacion de las tiendas
+class Ubicacion(Base):
+    __tablename__ = "Ubicacion"
+    id = Column(Integer, primary_key=True)
+    nombre = Column(String(100), unique=True, nullable=False)
+
+class StockPorUbicacion(Base):
+    __tablename__ = "StockPorUbicacion"
+    id = Column(Integer, primary_key=True)
+    producto_id = Column(Integer, ForeignKey("Producto.id"), nullable=False)
+    ubicacion_id = Column(Integer, ForeignKey("Ubicacion.id"), nullable=False)
+    cantidad = Column(Integer, default=0)
+
+    producto = relationship("Producto", backref="ubicaciones_stock")
+    ubicacion = relationship("Ubicacion", backref="stock_producto")
 
 # ⚡ Ejecutar solo si este archivo se ejecuta directamente / Run only if this file is executed directly
 if __name__ == "__main__":

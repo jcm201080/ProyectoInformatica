@@ -24,6 +24,7 @@
                 <th>
                   <a href="{{ url_for('ventas.ventas', orden='fecha', direccion=nueva_direccion, cliente=cliente, pagado=pagado, pagina=pagina) }}">Fecha</a>
                 </th>
+                <th>Ubicación</th>
                 <th>Total</th>
                 <th>Descuento</th>
                 <th>Total Final</th>
@@ -38,6 +39,7 @@
                     <td>{{ venta.id }}</td>
                     <td>{{ venta.cliente.nombre }}</td>
                     <td>{{ venta.fecha }}</td>
+                    <td>{{ venta.ubicacion.nombre if venta.ubicacion else '—' }}</td>
                     <td>{{ venta.total }}</td>
                     <td>{{ venta.descuento }}</td>
                     <td>{{ venta.total_final }}</td>

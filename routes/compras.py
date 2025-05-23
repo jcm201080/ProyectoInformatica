@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from db import sesion, Producto, Proveedor, login_required, rol_requerido, Compra
+from db import sesion, Producto, Proveedor, login_required, rol_requerido, Compra, Ubicacion, StockPorUbicacion
+from sqlalchemy.orm.exc import NoResultFound
 
 from routes.clientes import clientes
 from routes.productos import nuevo_producto
@@ -58,8 +59,13 @@ def nueva_compra():
     if request.method == "POST":
         producto_id = request.form["producto_id"]
         proveedor_id = request.form["proveedor_id"]
-        precio = float(request.form["precio"])
-        cantidad = int(request.form["cantidad"])
+
+        try:
+            precio = float(request.form["precio"])
+            cantidad = int(request.form["cantidad"])
+        except ValueError:
+            flash("Precio o cantidad inválidos. Asegúrate de rellenar todos los campos.", "error")
+            return redirect(url_for("compras.nueva_compra"))
 
         # Obtener el producto
         producto = sesion.query(Producto).get(producto_id)
@@ -81,6 +87,22 @@ def nueva_compra():
         # Actualizar stock (aunque haya excedido el límite)
         producto.stock = nuevo_stock
 
+        # Añadir stock al almacén
+        ubicacion_almacen = sesion.query(Ubicacion).filter_by(nombre="Almacén").first()
+        try:
+            stock_ubicacion = sesion.query(StockPorUbicacion).filter_by(
+                producto_id=producto.id,
+                ubicacion_id=ubicacion_almacen.id
+            ).one()
+            stock_ubicacion.cantidad += cantidad
+        except NoResultFound:
+            stock_ubicacion = StockPorUbicacion(
+                producto_id=producto.id,
+                ubicacion_id=ubicacion_almacen.id,
+                cantidad=cantidad
+            )
+            sesion.add(stock_ubicacion)
+
         # Registrar la compra
         nueva_compra = Compra(
             producto_id=producto_id,
@@ -96,6 +118,7 @@ def nueva_compra():
         return redirect(url_for("compras.compras"))
 
     return render_template("compras/nueva_compra.html", productos=productos, proveedores=proveedores)
+
 
 
 @compras_bp.route('/compras/editar/<int:id>', methods=['GET', 'POST'])

@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from db import engine, Base, verify_user, sesion, crear_usuarios_por_defecto, Cliente, login_required
+from db import engine, Base, verify_user, sesion, crear_usuarios_por_defecto, Cliente, login_required, Ubicacion
 
 # Importar Blueprints (rutas organizadas)
 from routes.index import index_bp
@@ -11,6 +11,8 @@ from routes.ventas import ventas_bp
 from routes.compras import compras_bp
 from routes.graficas import graficas_bp
 from routes.graficas_py import graficas_py_bp
+from routes.almacenes import almacenes_bp
+
 
 # 🚀 Crear aplicación Flask
 # ✨ Create the Flask app
@@ -64,6 +66,17 @@ def logout():
     flash('Has cerrado sesión correctamente', 'info')
     return redirect(url_for('index'))
 
+
+# Paso 2: Inicializar ubicaciones por defecto en main.py
+def crear_ubicaciones_por_defecto():
+    ubicaciones = ["Almacén", "Oficina1 (Sevilla)", "Oficina2 (Madrid)", "Oficina3 (Valencia)"]
+    for nombre in ubicaciones:
+        if not sesion.query(Ubicacion).filter_by(nombre=nombre).first():
+            sesion.add(Ubicacion(nombre=nombre))
+    sesion.commit()
+
+crear_ubicaciones_por_defecto()
+
 # 📍 Registrar todos los Blueprints / Register all route modules
 app.register_blueprint(index_bp)
 app.register_blueprint(productos_bp)
@@ -73,6 +86,11 @@ app.register_blueprint(ventas_bp)
 app.register_blueprint(compras_bp)
 app.register_blueprint(graficas_bp)
 app.register_blueprint(graficas_py_bp)
+app.register_blueprint(almacenes_bp)
+
+
+
+
 
 # ▶️ Iniciar la aplicación si este archivo es el principal / Run the app if executed directly
 if __name__ == '__main__':
