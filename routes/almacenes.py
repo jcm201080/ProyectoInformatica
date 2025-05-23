@@ -66,32 +66,23 @@ def mover_producto():
     ubicaciones = sesion.query(Ubicacion).all()
     producto = sesion.query(Producto).get(producto_id) if producto_id else None
 
-    # Stock actual en Almacén o ubicación central
-    stock_actual = 0
-    if producto:
-        ubicacion_origen = sesion.query(Ubicacion).filter_by(nombre="Almacén").first()
-        stock = sesion.query(StockPorUbicacion).filter_by(producto_id=producto.id, ubicacion_id=ubicacion_origen.id).first()
-        stock_actual = stock.cantidad if stock else 0
-
     if request.method == 'POST':
+        origen_id = int(request.form['origen_id'])
         destino_id = int(request.form['destino_id'])
         cantidad = int(request.form['cantidad'])
 
-        ubicacion_origen = sesion.query(Ubicacion).filter_by(nombre="Almacén").first()
-        stock_origen = sesion.query(StockPorUbicacion).filter_by(producto_id=producto.id, ubicacion_id=ubicacion_origen.id).first()
+        if origen_id == destino_id:
+            flash("La ubicación origen y destino no pueden ser iguales.", "error")
+            return redirect(url_for("almacenes.mover_producto", producto_id=producto_id))
 
+        stock_origen = sesion.query(StockPorUbicacion).filter_by(producto_id=producto.id, ubicacion_id=origen_id).first()
         if not stock_origen or stock_origen.cantidad < cantidad:
-            flash("No hay suficiente stock disponible para mover.", "error")
-            return redirect(url_for("almacenes.mover_producto", producto_id=producto.id))
+            flash("No hay suficiente stock disponible en la ubicación origen.", "error")
+            return redirect(url_for("almacenes.mover_producto", producto_id=producto_id))
 
         stock_destino = sesion.query(StockPorUbicacion).filter_by(producto_id=producto.id, ubicacion_id=destino_id).first()
-
         if not stock_destino:
-            stock_destino = StockPorUbicacion(
-                producto_id=producto.id,
-                ubicacion_id=destino_id,
-                cantidad=0
-            )
+            stock_destino = StockPorUbicacion(producto_id=producto.id, ubicacion_id=destino_id, cantidad=0)
             sesion.add(stock_destino)
 
         stock_origen.cantidad -= cantidad
@@ -99,6 +90,7 @@ def mover_producto():
         sesion.commit()
 
         flash("✅ Producto movido correctamente.", "success")
-        return redirect(url_for("almacenes.ver_almacenes"))
+        return redirect(url_for("almacenes.mover_producto", producto_id=producto_id))
 
-    return render_template("almacenes/mover_producto.html", producto=producto, ubicaciones=ubicaciones, stock_actual=stock_actual)
+    return render_template("almacenes/mover_producto.html", producto=producto, ubicaciones=ubicaciones)
+

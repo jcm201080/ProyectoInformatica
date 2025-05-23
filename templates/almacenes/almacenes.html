@@ -1,38 +1,31 @@
-
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
     <h1>📦 Distribución de Productos por Ubicación</h1>
 
-    <form method="GET" action="{{ url_for('almacenes.ver_almacenes') }}" class="mt-3">
-        <input type="text" name="nombre" placeholder="Buscar producto..." value="{{ nombre or '' }}">
-        <button type="submit" class="btn">Buscar</button>
-    </form>
+    <!-- Cuadro de búsqueda directamente visible -->
+    <div class="botones-superiores">
+        <a href="#form-busqueda-almacen" class="btn btn-add btn-search" >🔎 Buscar</a>
+    </div>
 
     <div class="tabla-responive">
         <table class="tabla-estilizada">
+            <div class="alerta-orden">
+              📌 Puedes ordenar por <strong>Producto</strong> haciendo clic en los encabezados de la tabla.
+            </div>
             <thead>
                 <tr>
                     {% set nueva_direccion = 'desc' if direccion == 'asc' else 'asc' %}
                     <th>
-                        <a href="{{ url_for('almacenes.ver_almacenes', orden='producto', direccion=nueva_direccion, nombre=nombre) }}">Producto
-                        {% if orden == 'producto' %}
-                            {% if direccion == 'asc' %} ↑ {% else %} ↓ {% endif %}
-                        {% endif %}
+                        <a href="{{ url_for('almacenes.ver_almacenes', orden='producto', direccion=nueva_direccion, nombre=nombre) }}">
+                            Producto
+                            {% if orden == 'producto' %}
+                                {% if direccion == 'asc' %} ↑ {% else %} ↓ {% endif %}
+                            {% endif %}
                         </a>
                     </th>
                     {% for ubicacion in ubicaciones %}
-                        <th>
-                            {% if ubicacion.nombre == 'Almacén' %}
-                                <a href="{{ url_for('almacenes.ver_almacenes', orden='almacen', direccion=nueva_direccion, nombre=nombre) }}">{{ ubicacion.nombre }}
-                                {% if orden == 'almacen' %}
-                                    {% if direccion == 'asc' %} ↑ {% else %} ↓ {% endif %}
-                                {% endif %}
-                                </a>
-                            {% else %}
-                                {{ ubicacion.nombre }}
-                            {% endif %}
-                        </th>
+                        <th>{{ ubicacion.nombre }}</th>
                     {% endfor %}
                     <th>Acción</th>
                 </tr>
@@ -62,5 +55,19 @@
             <a href="{{ url_for('almacenes.ver_almacenes', pagina=pagina+1, nombre=nombre, orden=orden, direccion=direccion) }}" class="btn-pagina">Siguiente ➡️</a>
         {% endif %}
     </div>
+    <form method="GET" action="{{ url_for('almacenes.ver_almacenes') }}" class="mb-3 d-flex" id="form-busqueda-almacen">
+        <input type="text" name="nombre" placeholder="🔎 Buscar producto..." value="{{ nombre or '' }}">
+        <button type="submit" class="btn">Buscar</button>
+    </form>
+
+    <script>
+        document.querySelector(".btn-search").addEventListener("click", function(e) {
+            setTimeout(() => {
+                const input = document.querySelector("#form-busqueda-almacen input[name='nombre']");
+                if (input) input.focus();
+            }, 100);
+        });
+    </script>
+
 </div>
 {% endblock %}

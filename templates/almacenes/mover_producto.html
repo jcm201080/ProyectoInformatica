@@ -1,42 +1,71 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
-    <h2>↔️ Mover Producto entre Ubicaciones</h2>
+<h2>↔️ Mover Producto entre Ubicaciones</h2>
 
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <div class="alerta">
-          <ul>
-            {% for message in messages %}
-              <li>{{ message }}</li>
-            {% endfor %}
-          </ul>
-        </div>
-      {% endif %}
-    {% endwith %}
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div class="alerta">
+      <ul>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endwith %}
 
-    {% if producto %}
-    <form method="POST">
-        <p><strong>Producto:</strong> {{ producto.nombre }}</p>
-        <p><strong>Stock actual en Almacén:</strong> {{ stock_actual }}</p>
+{% if producto %}
+<form method="POST">
+    <p><strong>Producto:</strong> {{ producto.nombre }}</p>
 
-        <label for="destino_id">Ubicación destino:</label>
-        <select name="destino_id" required>
-            {% for ubicacion in ubicaciones %}
-                {% if ubicacion.nombre != "Almacén" %}
-                    <option value="{{ ubicacion.id }}">{{ ubicacion.nombre }}</option>
-                {% endif %}
-            {% endfor %}
-        </select>
+    <label for="origen_id">Ubicación origen:</label>
+    <select name="origen_id" required>
+        {% for ubicacion in ubicaciones %}
+            <option value="{{ ubicacion.id }}">{{ ubicacion.nombre }}</option>
+        {% endfor %}
+    </select>
 
-        <label for="cantidad">Cantidad a mover:</label>
-        <input type="number" name="cantidad" min="1" max="{{ stock_actual }}" required>
+    <label for="destino_id">Ubicación destino:</label>
+    <select name="destino_id" required>
+        {% for ubicacion in ubicaciones %}
+            <option value="{{ ubicacion.id }}">{{ ubicacion.nombre }}</option>
+        {% endfor %}
+    </select>
 
-        <button type="submit" class="btn">Mover</button>
-        <a href="{{ url_for('almacenes.ver_almacenes') }}" class="btn-cancel">Cancelar</a>
-    </form>
-    {% else %}
-        <p>⚠️ No se ha seleccionado un producto.</p>
-    {% endif %}
-</div>
+    <label for="cantidad">Cantidad a mover:</label>
+    <input type="number" name="cantidad" min="1" required>
+
+    <button type="submit" class="btn btn_primary">Mover</button>
+    <a href="{{ url_for('almacenes.ver_almacenes') }}" class="btn btn-cancel">Cancelar</a>
+</form>
+
+<hr>
+{% set cantidades_por_ubicacion = {} %}
+{% for entry in producto.ubicaciones_stock %}
+    {% set _ = cantidades_por_ubicacion.update({entry.ubicacion.id: entry.cantidad}) %}
+{% endfor %}
+
+<hr>
+<h3>📍 Distribución actual por Ubicación</h3>
+<table class="tabla-estilizada">
+    <thead>
+        <tr>
+            <th>Ubicación</th>
+            <th>Cantidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for ubicacion in ubicaciones %}
+        <tr>
+            <td>{{ ubicacion.nombre }}</td>
+            <td>{{ cantidades_por_ubicacion.get(ubicacion.id, 0) }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<hr>
+{% else %}
+    <p>⚠️ No se ha seleccionado un producto.</p>
+{% endif %}
+
 {% endblock %}
