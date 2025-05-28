@@ -4,6 +4,10 @@ from db import sesion, Producto, Proveedor, login_required, rol_requerido
 from sqlalchemy import func
 import matplotlib.pyplot as plt
 import os
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 
 graficas_bp = Blueprint('graficas', __name__)
 
@@ -68,3 +72,48 @@ def comparativa_proveedores():
     return jsonify({"proveedores": nombres, "compras": compras, "ventas": ventas})
 
 
+
+#Graficas ventas por ubicación
+@graficas_bp.route("/graficas/python")
+@rol_requerido('admin')
+def generar_grafico_ventas_por_ubicacion():
+    from sqlalchemy import func
+    from db import sesion, Ubicacion, Venta, DetalleVenta
+    import os
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+
+    print("🟦 Generando imagen de ventas por ubicación...")
+
+    # Crear carpeta si no existe
+    os.makedirs("static/graficas", exist_ok=True)
+
+    # Consulta de datos
+    datos = (
+        sesion.query(Ubicacion.nombre, func.sum(DetalleVenta.cantidad))
+        .join(Venta, Ubicacion.id == Venta.ubicacion_id)
+        .join(DetalleVenta, Venta.id == DetalleVenta.venta_id)
+        .group_by(Ubicacion.nombre)
+        .all()
+    )
+
+    # Generar gráfica si hay datos
+    if datos:
+        ubicaciones = [d[0] for d in datos]
+        cantidades = [int(d[1]) for d in datos]
+
+        plt.figure(figsize=(10, 6))
+        plt.bar(ubicaciones, cantidades, color='#FF6F61')  # Color coral atractivo
+        plt.title("Comparativa de Ventas por Tienda")
+        plt.xlabel("Ubicación")
+        plt.ylabel("Cantidad Vendida")
+        plt.xticks(rotation=45)
+        plt.tight_layout()
+        plt.savefig("static/graficas/ventas_por_ubicacion.png")
+        plt.close()
+        print("✅ Gráfica generada correctamente.")
+    else:
+        print("⚠️ No hay datos de ventas por ubicación.")
+
+    return render_template("graficas/python/graficas_python.html")

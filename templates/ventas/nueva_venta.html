@@ -1,54 +1,62 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<!-- Bloque para mostrar los mensajes flash -->
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div class="alerta">
-            <ul>
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-    {% endif %}
-{% endwith %}
 
 <h2>Registrar Nueva Venta</h2>
 <form method="POST">
     <label>Cliente:</label>
     <select name="cliente_id">
         {% for cliente in clientes %}
-            <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+            <option value="{{ cliente.id }}"
+                {% if datos_previos and cliente.id|string == datos_previos.cliente_id %}selected{% endif %}>
+                {{ cliente.nombre }}
+            </option>
         {% endfor %}
     </select>
 
     <h3>Productos</h3>
     <div id="productos">
+        {% set datos = datos_previos if datos_previos else {} %}
+        {% for i in range(datos.productos_ids|length if datos.productos_ids else 1) %}
         <div class="producto">
             <select name="producto_id[]">
                 {% for producto in productos %}
-                <option value="{{ producto.id }}">{{ producto.nombre }} - ${{ producto.precio }}</option>
+                <option value="{{ producto.id }}"
+                    {% if datos.productos_ids and producto.id|string == datos.productos_ids[i] %}selected{% endif %}>
+                    {{ producto.nombre }} - ${{ producto.precio }}
+                </option>
                 {% endfor %}
             </select>
-            <input type="number" name="cantidad[]" min="1" value="1">
-            <label>Ubicación de la venta:</label>
-            <select name="ubicacion_id" required>
-                {% for ubicacion in ubicaciones %}
-                <option value="{{ ubicacion.id }}">{{ ubicacion.nombre }}</option>
-                {% endfor %}
-            </select>
+
+            <input type="number" name="cantidad[]" min="1"
+                   value="{{ datos.cantidades[i] if datos.cantidades else 1 }}">
+
             <button type="button" onclick="eliminarProducto(this)" class="btn btn-delete">🗑️ Producto</button>
         </div>
-
+        {% endfor %}
     </div>
-    <button type="button" onclick="agregarProducto()">Agregar Producto</button>
+    <button type="button" onclick="agregarProducto()">➕ Agregar Producto</button>
 
+    <br><br>
+
+    <label>Ubicación de la venta:</label>
+    <select name="ubicacion_id" required>
+        {% for ubicacion in ubicaciones %}
+        <option value="{{ ubicacion.id }}"
+            {% if datos_previos and ubicacion.id == datos_previos.ubicacion_id|int %}selected{% endif %}>
+            {{ ubicacion.nombre }}
+        </option>
+        {% endfor %}
+    </select>
+
+    </select>
 
 
 
     <label>Descuento:</label>
-    <input type="number" name="descuento" value="0" step="0.01">
+    <input type="number" name="descuento"
+           value="{{ datos_previos.descuento if datos_previos else 0 }}" step="0.01">
+
+    <br><br>
 
     <button type="submit" class="btn btn-primary">Registrar Venta</button>
     <a href="{{ url_for('ventas.ventas') }}" class="btn btn-cancel">Cancelar</a>
@@ -65,7 +73,7 @@ function agregarProducto() {
             {% endfor %}
         </select>
         <input type="number" name="cantidad[]" min="1" value="1">
-        <button type="button" onclick="eliminarProducto(this)">Eliminar</button>
+        <button type="button" onclick="eliminarProducto(this)" class="btn btn-delete">🗑️ Producto</button>
     `;
     document.getElementById('productos').appendChild(div);
 }

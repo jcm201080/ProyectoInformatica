@@ -7,6 +7,8 @@ productos_bp = Blueprint('productos', __name__)
 @productos_bp.route('/productos')
 @login_required
 def ver_productos():
+    verificar_stock_bajo()
+
     orden = request.args.get("orden", "id")
     direccion = request.args.get("direccion", "asc")
     nombre = request.args.get("nombre", "")

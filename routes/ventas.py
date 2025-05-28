@@ -1,14 +1,15 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, send_file
 from sqlalchemy.dialects.mysql import DECIMAL
 from sqlalchemy import func
 from db import sesion, Venta, DetalleVenta, Cliente, Producto, login_required, rol_requerido, Ubicacion, StockPorUbicacion
 from decimal import Decimal
 from routes.productos import productos_bp
-from flask import send_file
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
+import io
+from routes.graficas import generar_grafico_ventas_por_ubicacion
 
 
 ventas_bp = Blueprint("ventas", __name__)
@@ -57,7 +58,6 @@ def ventas():
         direccion=direccion
     )
 
-
 @ventas_bp.route("/nueva_venta", methods=["GET", "POST"])
 @rol_requerido('admin')
 def nueva_venta():
@@ -68,47 +68,49 @@ def nueva_venta():
     if request.method == "POST":
         cliente_id = request.form["cliente_id"]
         productos_ids = request.form.getlist("producto_id[]")
-        ubicacion_id = int(request.form["ubicacion_id"])  # ✅ convertir a int
         cantidades = request.form.getlist("cantidad[]")
         descuento = float(request.form.get("descuento", 0.0))
+        ubicacion_id = int(request.form.get("ubicacion_id"))
+
         total = 0
         detalles = []
+        datos_previos = {
+            "cliente_id": cliente_id,
+            "productos_ids": productos_ids,
+            "cantidades": cantidades,
+            "descuento": descuento,
+            "ubicacion_id": ubicacion_id
+        }
 
-        # Validar stock por ubicación
         for i in range(len(productos_ids)):
             producto = sesion.query(Producto).get(productos_ids[i])
             cantidad = int(cantidades[i])
 
-            # Verificar si hay suficiente stock en esa ubicación
-            stock_ubicacion = sesion.query(StockPorUbicacion).filter_by(
+            stock_ubicado = sesion.query(StockPorUbicacion).filter_by(
                 producto_id=producto.id,
                 ubicacion_id=ubicacion_id
             ).first()
 
-            if not stock_ubicacion or stock_ubicacion.cantidad < cantidad:
-                flash(f"No hay suficiente stock de {producto.nombre} en esta ubicación. Solo quedan {stock_ubicacion.cantidad if stock_ubicacion else 0} unidades.", "error")
-                return redirect(url_for("ventas.nueva_venta"))
+            if not stock_ubicado or stock_ubicado.cantidad < cantidad:
+                disponible = stock_ubicado.cantidad if stock_ubicado else 0
+                flash(f"No hay suficiente stock de {producto.nombre} en esta ubicación. Quedan {disponible}.", "error")
+                return render_template("ventas/nueva_venta.html",
+                                       clientes=clientes,
+                                       productos=productos,
+                                       ubicaciones=ubicaciones,
+                                       datos_previos=datos_previos)
 
-            # Restar del stock de la ubicación
-            stock_ubicacion.cantidad -= cantidad
-
-            # Opcional: actualizar también el stock total
-            producto.stock -= cantidad
-
-            precio_unitario = producto.precio
-            subtotal = cantidad * precio_unitario
+            subtotal = cantidad * producto.precio
             total += subtotal
 
             detalles.append({
                 "producto_id": producto.id,
                 "cantidad": cantidad,
-                "precio_unitario": precio_unitario,
+                "precio_unitario": producto.precio,
                 "subtotal": subtotal
             })
 
         total_final = total * (1 - Decimal(descuento) / 100)
-
-        # Crear la venta
         nueva_venta = Venta(
             cliente_id=cliente_id,
             ubicacion_id=ubicacion_id,
@@ -117,24 +119,32 @@ def nueva_venta():
             total_final=total_final
         )
         sesion.add(nueva_venta)
-        sesion.commit()
+        sesion.flush()
 
-        # Añadir detalles de venta
         for detalle in detalles:
-            det = DetalleVenta(
-                venta_id=nueva_venta.id,
+            sesion.add(DetalleVenta(venta_id=nueva_venta.id, **detalle))
+
+            stock_ubicado = sesion.query(StockPorUbicacion).filter_by(
                 producto_id=detalle["producto_id"],
-                cantidad=detalle["cantidad"],
-                precio_unitario=detalle["precio_unitario"],
-                subtotal=detalle["subtotal"]
-            )
-            sesion.add(det)
+                ubicacion_id=ubicacion_id
+            ).first()
+
+            if stock_ubicado:
+                stock_ubicado.cantidad -= detalle["cantidad"]
 
         sesion.commit()
-        flash("Venta registrada con éxito", "success")
+
+        # 🔁 Actualiza la gráfica después de registrar la venta
+        generar_grafico_ventas_por_ubicacion
+
+        flash("Venta registrada con éxito ✅", "success")
         return redirect(url_for("ventas.ventas"))
 
-    return render_template("ventas/nueva_venta.html", clientes=clientes, productos=productos, ubicaciones=ubicaciones)
+    return render_template("ventas/nueva_venta.html",
+                           clientes=clientes,
+                           productos=productos,
+                           ubicaciones=ubicaciones)
+
 
 
 

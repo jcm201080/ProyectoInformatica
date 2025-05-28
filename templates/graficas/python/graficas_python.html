@@ -11,6 +11,13 @@
   <br>
   <h1>Gráficas Generadas con Python</h1>
 
+  {% if session.get('rol') == 'admin' %}
+    <h3>Comparativa de Ventas por Tienda</h3>
+    <img src="{{ url_for('static', filename='graficas/ventas_por_ubicacion.png') }}?v={{ config['SECRET_KEY'] | urlencode }}" alt="Comparativa por tienda" style="max-width:100%;">
+  {% endif %}
+
+
+
   <h2>Comparativa Ventas vs Compras por Mes (Últimos 6 meses)</h2>
   <img src="{{ url_for('static', filename='graficas/comparativa_mensual.png') }}" alt="Comparativa mensual" style="max-width:100%;">
 

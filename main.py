@@ -1,6 +1,6 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from db import engine, Base, verify_user, sesion, crear_usuarios_por_defecto, Cliente, login_required, Ubicacion
+from db import engine, Base, verify_user, sesion, crear_usuarios_por_defecto, Cliente, login_required, Ubicacion, Venta
 
 # Importar Blueprints (rutas organizadas)
 from routes.index import index_bp
@@ -87,8 +87,6 @@ app.register_blueprint(compras_bp)
 app.register_blueprint(graficas_bp)
 app.register_blueprint(graficas_py_bp)
 app.register_blueprint(almacenes_bp)
-
-
 
 
 
