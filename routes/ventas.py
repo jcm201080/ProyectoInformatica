@@ -9,13 +9,18 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet
 import io
-from routes.graficas import generar_grafico_ventas_por_ubicacion
+from routes.graficas_py import generar_grafico_ventas_por_ubicacion
 
 
 ventas_bp = Blueprint("ventas", __name__)
 
 @ventas_bp.route("/ventas")
 @login_required
+
+# 🧾 ventas()
+# ES: Muestra un listado de ventas con filtros por cliente y estado de pago, paginación y orden.
+# EN: Displays a list of sales with filters by client and payment status, including pagination and ordering.
+
 def ventas():
     cliente = request.args.get("cliente")
     pagado = request.args.get("pagado")
@@ -60,10 +65,22 @@ def ventas():
 
 @ventas_bp.route("/nueva_venta", methods=["GET", "POST"])
 @rol_requerido('admin')
+
+# 🆕 nueva_venta()
+# ES: Permite registrar una nueva venta. Valida stock por ubicación y descuenta unidades tras la venta.
+# EN: Allows registering a new sale. Validates stock by location and updates quantities after the sale.
+
 def nueva_venta():
     clientes = sesion.query(Cliente).all()
     productos = sesion.query(Producto).all()
     ubicaciones = sesion.query(Ubicacion).all()
+
+    # 🔧 Convertir los productos a JSON serializable
+    productos_json = [
+        {"id": p.id, "nombre": p.nombre, "precio": float(p.precio)}
+        for p in productos
+    ]
+    datos_previos = {}  # ← así siempre existirá, incluso en GET
 
     if request.method == "POST":
         cliente_id = request.form["cliente_id"]
@@ -98,7 +115,8 @@ def nueva_venta():
                                        clientes=clientes,
                                        productos=productos,
                                        ubicaciones=ubicaciones,
-                                       datos_previos=datos_previos)
+                                       datos_previos=datos_previos,
+                                       productos_json=productos_json)  # ← ESTA LÍNEA FALTABA
 
             subtotal = cantidad * producto.precio
             total += subtotal
@@ -143,14 +161,19 @@ def nueva_venta():
     return render_template("ventas/nueva_venta.html",
                            clientes=clientes,
                            productos=productos,
-                           ubicaciones=ubicaciones)
-
-
+                           ubicaciones=ubicaciones,
+                           datos_previos=datos_previos,
+                           productos_json=productos_json)
 
 
 #Cambia estado de pago
 @ventas_bp.route("/cambiar_estado_pago/<int:venta_id>/<int:nuevo_estado>", methods=["POST"])
 @login_required
+
+# 🔁 cambiar_estado_pago()
+# ES: Cambia el estado de pago (pagado/no pagado) de una venta concreta.
+# EN: Changes the payment status (paid/unpaid) of a specific sale.
+
 def cambiar_estado_pago(venta_id, nuevo_estado):
     # Usamos `sesion` en lugar de `db`
     venta = sesion.get(Venta, venta_id)  # Aquí cambiamos db por sesion
@@ -165,6 +188,11 @@ def cambiar_estado_pago(venta_id, nuevo_estado):
 
 @ventas_bp.route("/venta_detalle/<int:venta_id>")
 @login_required
+
+# 🔎 ver_detalle_venta()
+# ES: Muestra los detalles de una venta específica, incluyendo productos y precios.
+# EN: Displays the details of a specific sale, including products and pricing.
+
 def ver_detalle_venta(venta_id):
     # Obtener la venta y sus productos asociados
     venta = sesion.query(Venta).get(venta_id)
@@ -197,6 +225,11 @@ def ver_detalle_venta(venta_id):
 
 @ventas_bp.route("/registrar_venta", methods=["POST"])
 @rol_requerido('admin')
+
+# 🧾 registrar_venta()
+# ES: Registra una venta directa desde formulario, valida stock y descuenta productos.
+# EN: Registers a sale from a form, validates stock, and updates product quantities.
+
 def registrar_venta():
     # Datos recibidos del formulario de venta
     productos_vendidos = request.form.getlist('productos')  # Lista de productos vendidos
@@ -237,6 +270,11 @@ def registrar_venta():
 #Gráficas
 @ventas_bp.route('/graficas_ventas')
 @login_required
+
+# 📊 graficas_ventas()
+# ES: Muestra la plantilla base para ver gráficas relacionadas con ventas.
+# EN: Displays the base template for viewing sales-related graphs.
+
 def graficas_ventas():
     return render_template('ventas/graficas.html')
 
@@ -244,6 +282,11 @@ def graficas_ventas():
 #Venta por productos
 @ventas_bp.route("/datos_ventas")
 @login_required
+
+# 📈 datos_ventas()
+# ES: Devuelve datos agregados por producto en formato JSON para usar en gráficas.
+# EN: Returns aggregated product data in JSON format for use in graphs.
+
 def datos_ventas():
     # Realizar la consulta para obtener la suma de las cantidades por producto
     datos = sesion.query(
@@ -262,39 +305,16 @@ def datos_ventas():
     return jsonify({"productos": productos, "cantidades": cantidades})
 
 
-#Venta por mes
-@ventas_bp.route("/ventas_por_mes", methods=["GET"])
-@login_required
-def ventas_por_mes():
-    mes = request.args.get("mes")
-
-    if not mes:
-        return jsonify({"error": "Debes proporcionar un mes en formato MM"}), 400
-
-    try:
-        datos = sesion.query(
-            Producto.nombre.label("producto_nombre"),
-            func.sum(DetalleVenta.cantidad).label("total_cantidad")
-        ) \
-        .join(DetalleVenta, Producto.id == DetalleVenta.producto_id) \
-        .join(Venta, DetalleVenta.venta_id == Venta.id) \
-        .filter(func.substr(Venta.fecha, 6, 2) == mes) \
-        .group_by(Producto.nombre) \
-        .all()
-
-        productos = [producto for producto, cantidad in datos]
-        cantidades = [cantidad for producto, cantidad in datos]
-
-        return jsonify({"productos": productos, "cantidades": cantidades})
-
-    except Exception as e:
-        print("Error en ventas_por_mes:", e)
-        return jsonify({"error": str(e)}), 500
 
 
 @ventas_bp.route('/ventas/eliminar/<int:venta_id>', methods=['POST'])
 @login_required
 @rol_requerido('admin')
+
+# ❌ eliminar_venta()
+# ES: Elimina una venta y sus detalles asociados de la base de datos.
+# EN: Deletes a sale and its associated details from the database.
+
 def eliminar_venta(venta_id):
     venta = sesion.query(Venta).get(venta_id)
     if not venta:
@@ -314,6 +334,11 @@ def eliminar_venta(venta_id):
 @ventas_bp.route('/ventas/eliminar_producto/<int:detalle_id>', methods=['POST'])
 @login_required
 @rol_requerido('admin')
+
+# 🗑️ eliminar_producto()
+# ES: Elimina un producto específico de una venta y actualiza la base de datos.
+# EN: Deletes a specific product from a sale and updates the database.
+
 def eliminar_producto(detalle_id):
     detalle = sesion.query(DetalleVenta).get(detalle_id)
     if not detalle:
@@ -330,6 +355,11 @@ def eliminar_producto(detalle_id):
 @ventas_bp.route('/ventas/editar_producto/<int:detalle_id>', methods=['GET', 'POST'])
 @login_required
 @rol_requerido('admin')
+
+# ✏️ editar_producto()
+# ES: Permite modificar la cantidad o precio unitario de un producto en una venta.
+# EN: Allows modifying the quantity or unit price of a product in a sale.
+
 def editar_producto(detalle_id):
     detalle = sesion.query(DetalleVenta).get(detalle_id)
     if not detalle:
@@ -358,6 +388,11 @@ def editar_producto(detalle_id):
 
 @ventas_bp.route('/ventas/factura/<int:id>')
 @login_required
+
+# 📄 descargar_factura()
+# ES: Genera una factura en PDF con los datos de la venta, cliente y productos.
+# EN: Generates a PDF invoice with sale, client, and product data.
+
 def descargar_factura(id):
     venta = sesion.query(Venta).get(id)
     detalles = venta.detalles

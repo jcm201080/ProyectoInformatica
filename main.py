@@ -1,6 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 from db import engine, Base, verify_user, sesion, crear_usuarios_por_defecto, Cliente, login_required, Ubicacion, Venta
+from jinja2 import StrictUndefined
 
 # Importar Blueprints (rutas organizadas)
 from routes.index import index_bp
@@ -19,6 +20,10 @@ from routes.almacenes import almacenes_bp
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.secret_key = 'clavesecreta'  # Clave para manejar sesiones / Secret key for session handling
+
+# 🔐 Activa errores explícitos si faltan variables en las plantillas
+# Esto ayuda a detectar fallos como variables no pasadas en render_template()
+app.jinja_env.undefined = StrictUndefined
 
 # 📁 Verificar carpeta de base de datos
 # ✏️ Check if database folder exists, otherwise create it
@@ -87,6 +92,8 @@ app.register_blueprint(compras_bp)
 app.register_blueprint(graficas_bp)
 app.register_blueprint(graficas_py_bp)
 app.register_blueprint(almacenes_bp)
+
+
 
 
 

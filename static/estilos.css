@@ -7,6 +7,9 @@ html, body {
     background-color: #f4f4f4;
     text-align: center;
 }
+body {
+  overflow-x: hidden;
+}
 
 .wrapper {
     display: flex;
@@ -70,8 +73,11 @@ nav ul.menu li a.active {
     font-size: 0.75rem;
     text-align: center;
 }
-
-
+/*index*/
+.features ul {
+  list-style-type: none;
+  padding-left: 0;
+}
 
 /* 📄 FORMULARIOS */
 form {
@@ -444,7 +450,8 @@ footer {
     padding: 10px;
     width: 100%;
     text-align: center;
-    margin-top: auto;
+    margin-top: 40px;
+    padding-top: 20px;
 }
 
 /* 📱 RESPONSIVE MEDIA QUERIES */
@@ -537,6 +544,41 @@ footer {
         padding: 3px 4px !important;
     }
 }
+
+/*Gráficas*/
+.grafica {
+  max-width: 100%;
+  height: auto;
+  margin-bottom: 30px;
+  display: block;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+img.grafica {
+  display: block;
+  max-width: 100%;
+  margin-bottom: 40px; /* Espacio entre gráficas */
+  margin: 0 auto 40px auto; /* Centrado y espacio inferior */
+}
+
+.separaracion{
+margin-top: 40px;
+}
+.grafica + h2 {
+  margin-top: 20px; /* Separación extra entre imagen y siguiente título */
+}
+@media screen and (max-width: 768px) {
+  .solo-escritorio {
+    display: none !important;
+  }
+  img.grafica {
+    margin-bottom: 30px;
+  }
+}
+
 
 /* 🖥️ RESPONSIVE - Tablets: hasta 768px */
 @media screen and (max-width: 768px) {

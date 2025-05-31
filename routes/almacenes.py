@@ -1,12 +1,19 @@
 # rutas/almacenes.py
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from db import sesion, Producto, Ubicacion, StockPorUbicacion, login_required
 
+# 🔹 Definir el blueprint para almacenes / Define warehouses blueprint
 almacenes_bp = Blueprint('almacenes', __name__)
 
+# 📦 Mostrar productos y stock por ubicación / Display products and stock by location
 @almacenes_bp.route('/almacenes')
 @login_required
 def ver_almacenes():
+    """
+    ES: Muestra el stock de productos por ubicación. Permite filtrar por nombre y ordenar.
+    EN: Displays product stock per location. Allows filtering by name and sorting.
+    """
     nombre = request.args.get("nombre", "")
     pagina = int(request.args.get("pagina", 1))
     orden = request.args.get("orden", "producto")
@@ -15,12 +22,10 @@ def ver_almacenes():
 
     ubicaciones = sesion.query(Ubicacion).all()
 
-    # Filtro por nombre si se proporciona
     query = sesion.query(Producto)
     if nombre:
         query = query.filter(Producto.nombre.ilike(f"%{nombre}%"))
 
-    # Aplicar orden
     if orden == "producto":
         if direccion == "desc":
             query = query.order_by(Producto.nombre.desc())
@@ -56,12 +61,14 @@ def ver_almacenes():
                            hay_siguiente=hay_siguiente)
 
 
-
-
-#Mover productos entre ubicaciones (nueva ruta y formulario)
+# 🔄 Mover stock entre ubicaciones / Transfer stock between locations
 @almacenes_bp.route('/mover_producto', methods=['GET', 'POST'])
 @login_required
 def mover_producto():
+    """
+    ES: Permite mover unidades de producto entre ubicaciones, actualizando el stock.
+    EN: Enables transferring product units between locations, updating stock accordingly.
+    """
     producto_id = request.args.get("producto_id")
     ubicaciones = sesion.query(Ubicacion).all()
     producto = sesion.query(Producto).get(producto_id) if producto_id else None
@@ -75,14 +82,19 @@ def mover_producto():
             flash("La ubicación origen y destino no pueden ser iguales.", "error")
             return redirect(url_for("almacenes.mover_producto", producto_id=producto_id))
 
-        stock_origen = sesion.query(StockPorUbicacion).filter_by(producto_id=producto.id, ubicacion_id=origen_id).first()
+        stock_origen = sesion.query(StockPorUbicacion).filter_by(
+            producto_id=producto.id, ubicacion_id=origen_id).first()
+
         if not stock_origen or stock_origen.cantidad < cantidad:
             flash("No hay suficiente stock disponible en la ubicación origen.", "error")
             return redirect(url_for("almacenes.mover_producto", producto_id=producto_id))
 
-        stock_destino = sesion.query(StockPorUbicacion).filter_by(producto_id=producto.id, ubicacion_id=destino_id).first()
+        stock_destino = sesion.query(StockPorUbicacion).filter_by(
+            producto_id=producto.id, ubicacion_id=destino_id).first()
+
         if not stock_destino:
-            stock_destino = StockPorUbicacion(producto_id=producto.id, ubicacion_id=destino_id, cantidad=0)
+            stock_destino = StockPorUbicacion(
+                producto_id=producto.id, ubicacion_id=destino_id, cantidad=0)
             sesion.add(stock_destino)
 
         stock_origen.cantidad -= cantidad
@@ -93,4 +105,3 @@ def mover_producto():
         return redirect(url_for("almacenes.mover_producto", producto_id=producto_id))
 
     return render_template("almacenes/mover_producto.html", producto=producto, ubicaciones=ubicaciones)
-

@@ -1,8 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from db import sesion, Producto, Proveedor, login_required, rol_requerido
 
+# 🔹 Definir blueprint para proveedores / Define blueprint for suppliers
 proveedores_bp = Blueprint('proveedores', __name__)
 
+# 📋 Listar proveedores con filtros y paginación / List suppliers with filters and pagination
 @proveedores_bp.route('/proveedores')
 @login_required
 def listar_proveedores():
@@ -46,15 +48,14 @@ def listar_proveedores():
         direccion=direccion
     )
 
-
-
+# 🆕 Formulario para agregar proveedor (solo admin) / Show form to add new supplier (admin only)
 @proveedores_bp.route('/proveedores/nuevo')
 @login_required
 @rol_requerido('admin')
 def formulario_proveedor():
     return render_template('proveedores/agregar_proveedor.html')
 
-
+# 💾 Procesar nuevo proveedor / Process new supplier form
 @proveedores_bp.route('/add_proveedor', methods=['POST'])
 @login_required
 @rol_requerido('admin')
@@ -66,7 +67,7 @@ def add_proveedor():
     cif = request.form['cif']
     direccion = request.form['direccion']
 
-    # Comprobamos si ya existe el proveedor (por nombre o CIF, mejor aún)
+    # 🔍 Validar duplicado / Check for duplicate supplier
     existe_proveedor = sesion.query(Proveedor).filter(
         (Proveedor.nombre == nombre) | (Proveedor.cif == cif)
     ).first()
@@ -93,7 +94,7 @@ def add_proveedor():
 
     return redirect(url_for('proveedores.listar_proveedores'))
 
-
+# ✏️ Editar proveedor (solo admin) / Edit existing supplier (admin only)
 @proveedores_bp.route('/editar_proveedor/<int:id>', methods=['GET', 'POST'])
 @login_required
 @rol_requerido('admin')
@@ -123,7 +124,7 @@ def editar_proveedor(id):
 
     return render_template('proveedores/editar_proveedor.html', proveedor=proveedor)
 
-
+# 🗑️ Eliminar proveedor (si no tiene productos) / Delete supplier (if no products assigned)
 @proveedores_bp.route('/eliminar_proveedor/<int:id>', methods=['POST'])
 @login_required
 @rol_requerido('admin')

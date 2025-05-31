@@ -64,17 +64,33 @@
 
 <script>
 function agregarProducto() {
+    // Obtener productos ya seleccionados
+    const seleccionados = Array.from(document.querySelectorAll('select[name="producto_id[]"]'))
+        .map(select => select.value);
+
     let div = document.createElement('div');
     div.classList.add('producto');
+
+    // Crear el HTML del select y eliminar opciones ya usadas
+    let opciones = `{% for producto in productos %}
+        {% if producto.id|string not in seleccionados %}
+        <option value="{{ producto.id }}">{{ producto.nombre }} - ${{ producto.precio }}</option>
+        {% endif %}
+    {% endfor %}`;  // Esto NO funcionará porque Jinja se ejecuta en el servidor.
+
+    // Entonces, mejor: crear dinámicamente en JS
+    const productosDisponibles = {{ productos_json | tojson }};
+    const opcionesFiltradas = productosDisponibles
+        .filter(p => !seleccionados.includes(p.id.toString()))
+        .map(p => `<option value="${p.id}">${p.nombre} - $${p.precio}</option>`)
+        .join("");
+
     div.innerHTML = `
-        <select name="producto_id[]">
-            {% for producto in productos %}
-            <option value="{{ producto.id }}">{{ producto.nombre }} - ${{ producto.precio }}</option>
-            {% endfor %}
-        </select>
+        <select name="producto_id[]">${opcionesFiltradas}</select>
         <input type="number" name="cantidad[]" min="1" value="1">
         <button type="button" onclick="eliminarProducto(this)" class="btn btn-delete">🗑️ Producto</button>
     `;
+
     document.getElementById('productos').appendChild(div);
 }
 
@@ -83,4 +99,12 @@ function eliminarProducto(btn) {
 }
 </script>
 
+
 {% endblock %}
+
+
+<!--Se optó por implementar la validación de productos duplicados en el formulario de venta utilizando JavaScript del
+lado cliente. Aunque técnicamente sería posible realizar esta validación desde el backend (en ventas.py), implicaría
+un procesamiento adicional en el servidor y una experiencia de usuario más lenta. JavaScript permite filtrar los
+ productos disponibles dinámicamente sin necesidad de recargar la página, proporcionando una interfaz más
+ fluida e interactiva.->

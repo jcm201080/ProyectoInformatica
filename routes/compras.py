@@ -9,6 +9,7 @@ from datetime import datetime
 
 compras_bp = Blueprint('compras', __name__)
 
+#📅 Mostrar lista de compras con filtros y paginación / Show purchases with filters and pagination
 @compras_bp.route('/compras')
 @login_required
 def compras():
@@ -50,7 +51,7 @@ def compras():
     )
 
 
-
+#🛒 Registrar una nueva compra / Register a new purchase
 @compras_bp.route('/nueva_compra', methods=['GET', 'POST'])
 def nueva_compra():
     productos = sesion.query(Producto).all()
@@ -120,7 +121,7 @@ def nueva_compra():
     return render_template("compras/nueva_compra.html", productos=productos, proveedores=proveedores)
 
 
-
+#✏️ Editar una compra existente / Edit an existing purchase
 @compras_bp.route('/compras/editar/<int:id>', methods=['GET', 'POST'])
 @login_required
 @rol_requerido('admin')
@@ -141,6 +142,7 @@ def editar_compra(id):
     return render_template('compras/editar_compra.html', compra=compra, proveedores=proveedores)
 
 
+#🗑️ Eliminar una compra / Delete a purchase
 @compras_bp.route('/compras/eliminar/<int:id>', methods=['POST'])
 @login_required
 @rol_requerido('admin')

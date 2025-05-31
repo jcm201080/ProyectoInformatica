@@ -1,9 +1,10 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from db import sesion, Producto, login_required, rol_requerido
 
+# 🔹 Definir blueprint para productos / Define blueprint for products
 productos_bp = Blueprint('productos', __name__)
 
-# Vista principal de productos para usuarios registrados
+# 📦 Vista principal de productos para usuarios registrados / Main product view for logged-in users
 @productos_bp.route('/productos')
 @login_required
 def ver_productos():
@@ -50,15 +51,13 @@ def ver_productos():
         hay_siguiente=hay_siguiente
     )
 
-
-
-# Formulario para crear un nuevo producto (solo administradores)
+# 🆕 Formulario para crear un nuevo producto (solo administradores) / Form to create a new product (admin only)
 @productos_bp.route('/nuevo_producto')
 @rol_requerido('admin')
 def nuevo_producto():
     return render_template('producto/nuevo_producto.html')
 
-# Procesamiento del formulario de nuevo producto
+# 💾 Procesamiento del formulario de nuevo producto / Handle new product form submission
 @productos_bp.route('/add_product', methods=['POST'])
 @rol_requerido('admin')
 def add_product():
@@ -84,7 +83,7 @@ def add_product():
 
     return redirect(url_for('productos.nuevo_producto'))
 
-# Edición de producto (solo administradores)
+# ✏️ Edición de producto (solo administradores) / Edit product (admin only)
 @productos_bp.route('/editar_producto/<int:id>', methods=['GET', 'POST'])
 @rol_requerido('admin')
 def editar_producto(id):
@@ -112,7 +111,7 @@ def editar_producto(id):
 
     return render_template('producto/editar_producto.html', producto=producto)
 
-
+# ❌ Eliminar producto (solo administradores) / Delete product (admin only)
 @productos_bp.route('/eliminar_producto/<int:id>', methods=['POST'])
 @rol_requerido('admin')
 def eliminar_producto(id):
@@ -127,7 +126,7 @@ def eliminar_producto(id):
 
     return redirect(url_for('producto/productos.ver_productos'))
 
-
+# ⚠️ Verificación de stock bajo (menos del 10%) / Low stock warning (<10%)
 def verificar_stock_bajo():
     productos = sesion.query(Producto).all()
 
@@ -137,5 +136,3 @@ def verificar_stock_bajo():
 
             if porcentaje < 10:
                 flash(f'¡Atención! El producto "{producto.nombre}" tiene menos del 10% de stock.', 'warning')
-
-

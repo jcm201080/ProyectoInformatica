@@ -4,7 +4,7 @@
   <nav>
   <ul class="menu">
   <li><a href="{{ url_for('graficas_py.graficas_python') }}" class="{% if request.endpoint == 'graficas_py.graficas_python' %}active{% endif %}">Gráficas Python</a></li>
-  <li><a href="{{ url_for('graficas.graficas') }}" class="{% if request.endpoint == 'graficas.graficas' %}active{% endif %}">Gráficas JS</a></li>
+  <li><a class="solo-escritorio" href="{{ url_for('graficas.graficas') }}" class="{% if request.endpoint == 'graficas.graficas' %}active{% endif %}">Gráficas JS</a></li>
 
   </ul>
   </nav>
@@ -12,32 +12,31 @@
   <h1>Gráficas Generadas con Python</h1>
 
   {% if session.get('rol') == 'admin' %}
-    <h3>Comparativa de Ventas por Tienda</h3>
-    <img src="{{ url_for('static', filename='graficas/ventas_por_ubicacion.png') }}?v={{ config['SECRET_KEY'] | urlencode }}" alt="Comparativa por tienda" style="max-width:100%;">
+    <h2 class="solo-escritorio">Comparativa de Ventas por Tienda</h2>
+    <img class="solo-escritorio grafica" src="{{ url_for('static', filename='graficas/ventas_por_ubicacion.png') }}?v={{ config['SECRET_KEY'] | urlencode }}" alt="Comparativa por tienda" >
+    <h2>Ventas por Mes y Tienda (últimos 12 meses)</h2>
+    <img class="grafica" src="{{ url_for('static', filename='graficas/ventas_ubicaciones_mensual.png') }}?v={{ config['SECRET_KEY'] | urlencode }}" alt="Ventas por tienda mes a mes" >
+
   {% endif %}
-
-
-
   <h2>Comparativa Ventas vs Compras por Mes (Últimos 6 meses)</h2>
-  <img src="{{ url_for('static', filename='graficas/comparativa_mensual.png') }}" alt="Comparativa mensual" style="max-width:100%;">
+  <img class="grafica" src="{{ url_for('static', filename='graficas/comparativa_mensual.png') }}" alt="Comparativa mensual" >
 
-  <h2>📊 Ventas por Cliente (Gráfico Circular)</h2>
-  <img src="{{ url_for('static', filename='graficas/ventas_por_cliente.png') }}" alt="Gráfica circular de ventas por cliente" style="max-width: 600px;">
+  <h2 >📊 Ventas por Cliente (Gráfico Circular)</h2>
+  <img class="grafica" src="{{ url_for('static', filename='graficas/ventas_por_cliente.png') }}" alt="Gráfica circular de ventas por cliente">
 
   <h2>📊 Ventas por Cliente (Gráfico de Barras)</h2>
-  <img src="{{ url_for('static', filename='graficas/ventas_por_cliente_barra.png') }}" alt="Gráfica de barras de ventas por cliente" style="max-width: 100%;">
+  <img class="grafica" src="{{ url_for('static', filename='graficas/ventas_por_cliente_barra.png') }}" alt="Gráfica de barras de ventas por cliente">
 
-  <h2>Ventas Totales</h2>
-  <img src="{{ url_for('static', filename='graficas/ventas.png') }}" alt="Gráfica de Ventas">
+  <h2 class="solo-escritorio">Ventas Totales</h2>
+  <img class="solo-escritorio grafica" src="{{ url_for('static', filename='graficas/ventas.png') }}" alt="Gráfica de Ventas">
 
-  <h2>Compras por Proveedor</h2>
-  <img src="{{ url_for('static', filename='graficas/compras_por_proveedor.png') }}" alt="Compras por proveedor">
+  <h2 class="solo-escritorio">Compras por Proveedor</h2>
+  <img class="solo-escritorio grafica" src="{{ url_for('static', filename='graficas/compras_por_proveedor.png') }}" alt="Compras por proveedor">
 
-  <h2>Compras por Mes</h2>
-  <img src="{{ url_for('static', filename='graficas/compras_por_mes.png') }}" alt="Compras mensuales">
+  <h2 class="solo-escritorio">Compras por Mes</h2>
+  <img class="solo-escritorio grafica" src="{{ url_for('static', filename='graficas/compras_por_mes.png') }}" alt="Compras mensuales">
 
-  <h2>Comparativa Compras vs Ventas por Producto</h2>
-  <img src="{{ url_for('static', filename='graficas/comparativa_productos.png') }}" alt="Gráfica Comparativa Compras/Ventas">
-
+  <h2 class="solo-escritorio">Comparativa Compras vs Ventas por Producto</h2>
+  <img class="solo-escritorio grafica" src="{{ url_for('static', filename='graficas/comparativa_productos.png') }}" alt="Gráfica Comparativa Compras/Ventas">
 
 {% endblock %}
