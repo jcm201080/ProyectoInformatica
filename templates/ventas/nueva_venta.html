@@ -1,103 +1,59 @@
 {% extends 'base.html' %}
+
 {% block content %}
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alerta">
+                <ul>
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    {% endwith %}
 
-<h2>Registrar Nueva Venta</h2>
-<form method="POST">
-    <label>Cliente:</label>
-    <select name="cliente_id">
-        {% for cliente in clientes %}
-            <option value="{{ cliente.id }}"
-                {% if datos_previos and cliente.id|string == datos_previos.cliente_id %}selected{% endif %}>
-                {{ cliente.nombre }}
-            </option>
-        {% endfor %}
-    </select>
-
-    <h3>Productos</h3>
-    <div id="productos">
-        {% set datos = datos_previos if datos_previos else {} %}
-        {% for i in range(datos.productos_ids|length if datos.productos_ids else 1) %}
-        <div class="producto">
-            <select name="producto_id[]">
-                {% for producto in productos %}
-                <option value="{{ producto.id }}"
-                    {% if datos.productos_ids and producto.id|string == datos.productos_ids[i] %}selected{% endif %}>
-                    {{ producto.nombre }} - ${{ producto.precio }}
+    <h2>Registrar Nueva Venta</h2>
+    <form method="POST">
+        <label>Cliente:</label>
+        <select name="cliente_id" required>
+            {% for cliente in clientes %}
+                <option value="{{ cliente.id }}"
+                    {% if datos_previos.get('cliente_id') == cliente.id|string %}selected{% endif %} >
+                    {{ cliente.nombre }}
                 </option>
-                {% endfor %}
-            </select>
+            {% endfor %}
+        </select>
 
-            <input type="number" name="cantidad[]" min="1"
-                   value="{{ datos.cantidades[i] if datos.cantidades else 1 }}">
+        <label>Ubicación:</label>
+        <select name="ubicacion_id" required>
+            {% for ubicacion in ubicaciones %}
+                <option value="{{ ubicacion.id }}"
+                    {% if datos_previos.get('ubicacion_id') == ubicacion.id|string %}selected{% endif %}>
+                    {{ ubicacion.nombre }}
+                </option>
+            {% endfor %}
+        </select>
 
-            <button type="button" onclick="eliminarProducto(this)" class="btn btn-delete">🗑️ Producto</button>
+        <h3>Productos</h3>
+        <div id="productos">
+            <!-- Contenido generado dinámicamente -->
         </div>
-        {% endfor %}
-    </div>
-    <button type="button" onclick="agregarProducto()">➕ Agregar Producto</button>
+        <button type="button" onclick="agregarProducto()">➕ Agregar Producto</button>
 
-    <br><br>
+        <label>Descuento (%):</label>
+        <input type="number" name="descuento" value="{{ datos_previos.get('descuento', 0) }}" step="0.01" min="0">
 
-    <label>Ubicación de la venta:</label>
-    <select name="ubicacion_id" required>
-        {% for ubicacion in ubicaciones %}
-        <option value="{{ ubicacion.id }}"
-            {% if datos_previos and ubicacion.id == datos_previos.ubicacion_id|int %}selected{% endif %}>
-            {{ ubicacion.nombre }}
-        </option>
-        {% endfor %}
-    </select>
-
-    </select>
-
-
-
-    <label>Descuento:</label>
-    <input type="number" name="descuento"
-           value="{{ datos_previos.descuento if datos_previos else 0 }}" step="0.01">
-
-    <br><br>
-
-    <button type="submit" class="btn btn-primary">Registrar Venta</button>
-    <a href="{{ url_for('ventas.ventas') }}" class="btn btn-cancel">Cancelar</a>
-</form>
+        <button type="submit" class="btn btn-primary">Registrar Venta</button>
+        <a href="{{ url_for('ventas.ventas') }}" class="btn btn-cancel">Cancelar</a>
+    </form>
 
 <script>
-function agregarProducto() {
-    // Obtener productos ya seleccionados
-    const seleccionados = Array.from(document.querySelectorAll('select[name="producto_id[]"]'))
-        .map(select => select.value);
-
-    let div = document.createElement('div');
-    div.classList.add('producto');
-
-    // Crear el HTML del select y eliminar opciones ya usadas
-    let opciones = `{% for producto in productos %}
-        {% if producto.id|string not in seleccionados %}
-        <option value="{{ producto.id }}">{{ producto.nombre }} - ${{ producto.precio }}</option>
-        {% endif %}
-    {% endfor %}`;  // Esto NO funcionará porque Jinja se ejecuta en el servidor.
-
-    // Entonces, mejor: crear dinámicamente en JS
-    const productosDisponibles = {{ productos_json | tojson }};
-    const opcionesFiltradas = productosDisponibles
-        .filter(p => !seleccionados.includes(p.id.toString()))
-        .map(p => `<option value="${p.id}">${p.nombre} - $${p.precio}</option>`)
-        .join("");
-
-    div.innerHTML = `
-        <select name="producto_id[]">${opcionesFiltradas}</select>
-        <input type="number" name="cantidad[]" min="1" value="1">
-        <button type="button" onclick="eliminarProducto(this)" class="btn btn-delete">🗑️ Producto</button>
-    `;
-
-    document.getElementById('productos').appendChild(div);
-}
-
-function eliminarProducto(btn) {
-    btn.parentElement.remove();
-}
+    // Exponer la variable para el script externo
+    window.productos_json = {{ productos_json | tojson }};
 </script>
+<script src="{{ url_for('static', filename='js/nueva_venta.js') }}"></script>
+
 
 
 {% endblock %}
