@@ -164,7 +164,7 @@ def rol_requerido(rol_permitido):
         def funcion_decorada(*args, **kwargs):
             if 'usuario' not in session:
                 flash('Debes iniciar sesión primero.', 'error')
-                return redirect(url_for('login_bp.login'))
+                return redirect(url_for('login'))
 
             if session.get('rol') != rol_permitido:
                 flash('No tienes permisos para acceder a esta página.', 'error')

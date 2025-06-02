@@ -1,13 +1,9 @@
-
 function agregarProducto() {
-    // Obtener productos ya seleccionados
     const seleccionados = Array.from(document.querySelectorAll('select[name="producto_id[]"]'))
         .map(select => select.value);
 
-    // Lista de productos disponibles (desde el backend en JSON)
-    const productosDisponibles = {{ productos_json | tojson }};
+    const productosDisponibles = window.productos_json || [];
 
-    // Filtrar los productos que no han sido seleccionados
     const opcionesFiltradas = productosDisponibles
         .filter(p => !seleccionados.includes(p.id.toString()))
         .map(p => `<option value="${p.id}">${p.nombre} - $${p.precio.toFixed(2)}</option>`)
@@ -18,7 +14,6 @@ function agregarProducto() {
         return;
     }
 
-    // Crear el contenedor del nuevo producto
     const div = document.createElement('div');
     div.classList.add('producto');
 

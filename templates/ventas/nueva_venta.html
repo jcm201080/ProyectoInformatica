@@ -1,66 +1,75 @@
 {% extends 'base.html' %}
-
 {% block content %}
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="alerta">
-                <ul>
-                    {% for message in messages %}
-                        <li>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
-    {% endwith %}
 
-    <h2>Registrar Nueva Venta</h2>
-    <form method="POST">
-        <label>Cliente:</label>
-        <select name="cliente_id" required>
-            {% for cliente in clientes %}
-                <option value="{{ cliente.id }}"
-                    {% if datos_previos.get('cliente_id') == cliente.id|string %}selected{% endif %} >
-                    {{ cliente.nombre }}
+<h2>Registrar Nueva Venta</h2>
+<form method="POST">
+    <label>Cliente:</label>
+    <select name="cliente_id">
+        {% for cliente in clientes %}
+            <option value="{{ cliente.id }}"
+                {% if datos_previos and cliente.id|string == datos_previos.get('cliente_id') %}selected{% endif %}>
+                {{ cliente.nombre }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <h3>Productos</h3>
+    <div id="productos">
+        {% set datos = datos_previos if datos_previos else {} %}
+        {% set lista_ids = datos.get('productos_ids', []) %}
+        {% set cantidades = datos.get('cantidades', []) %}
+        {% for i in range(lista_ids|length if lista_ids else 1) %}
+        <div class="producto">
+            <select name="producto_id[]">
+                {% for producto in productos %}
+                <option value="{{ producto.id }}"
+                    {% if lista_ids and producto.id|string == lista_ids[i] %}selected{% endif %}>
+                    {{ producto.nombre }} - ${{ producto.precio }}
                 </option>
-            {% endfor %}
-        </select>
+                {% endfor %}
+            </select>
 
-        <label>Ubicación:</label>
-        <select name="ubicacion_id" required>
-            {% for ubicacion in ubicaciones %}
-                <option value="{{ ubicacion.id }}"
-                    {% if datos_previos.get('ubicacion_id') == ubicacion.id|string %}selected{% endif %}>
-                    {{ ubicacion.nombre }}
-                </option>
-            {% endfor %}
-        </select>
+            <input type="number" name="cantidad[]" min="1"
+                   value="{{ cantidades[i] if cantidades|length > i else 1 }}">
 
-        <h3>Productos</h3>
-        <div id="productos">
-            <!-- Contenido generado dinámicamente -->
+            <button type="button" onclick="eliminarProducto(this)" class="btn btn-delete">🗑️ Producto</button>
         </div>
-        <button type="button" onclick="agregarProducto()">➕ Agregar Producto</button>
+        {% endfor %}
+    </div>
+    <button type="button" onclick="agregarProducto()">➕ Agregar Producto</button>
 
-        <label>Descuento (%):</label>
-        <input type="number" name="descuento" value="{{ datos_previos.get('descuento', 0) }}" step="0.01" min="0">
+    <br><br>
 
-        <button type="submit" class="btn btn-primary">Registrar Venta</button>
-        <a href="{{ url_for('ventas.ventas') }}" class="btn btn-cancel">Cancelar</a>
-    </form>
+    <label>Ubicación de la venta:</label>
+    <select name="ubicacion_id" required>
+        {% for ubicacion in ubicaciones %}
+        <option value="{{ ubicacion.id }}"
+            {% if datos_previos and ubicacion.id == datos_previos.get('ubicacion_id')|int %}selected{% endif %}>
+            {{ ubicacion.nombre }}
+        </option>
+        {% endfor %}
+    </select>
+
+    <label>Descuento:</label>
+    <input type="number" name="descuento"
+           value="{{ datos_previos.get('descuento', 0) }}" step="0.01">
+
+    <br><br>
+
+    <button type="submit" class="btn btn-primary">Registrar Venta</button>
+    <a href="{{ url_for('ventas.ventas') }}" class="btn btn-cancel">Cancelar</a>
+</form>
 
 <script>
-    // Exponer la variable para el script externo
-    window.productos_json = {{ productos_json | tojson }};
+  window.productos_json = {{ productos_json | tojson }};
 </script>
 <script src="{{ url_for('static', filename='js/nueva_venta.js') }}"></script>
 
 
-
 {% endblock %}
-
 
 <!--Se optó por implementar la validación de productos duplicados en el formulario de venta utilizando JavaScript del
 lado cliente. Aunque técnicamente sería posible realizar esta validación desde el backend (en ventas.py), implicaría
 un procesamiento adicional en el servidor y una experiencia de usuario más lenta. JavaScript permite filtrar los
- productos disponibles dinámicamente sin necesidad de recargar la página, proporcionando una interfaz más
- fluida e interactiva.->
+productos disponibles dinámicamente sin necesidad de recargar la página, proporcionando una interfaz más
+fluida e interactiva.-->

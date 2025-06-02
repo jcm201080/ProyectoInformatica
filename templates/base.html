@@ -21,7 +21,7 @@
       <ul class="menu">
           <li><a href="{{ url_for('index') }}" class="btn {% if request.endpoint == 'index' %}active{% endif %}">🏠 Inicio</a></li>
           <li><a href="{{ url_for('productos.ver_productos') }}" class="btn {% if 'productos' in request.endpoint %}active{% endif %}">🖥️ Productos</a></li>
-          <li><a href="{{ url_for('almacenes.ver_almacenes') }}" class="btn">📦 Almacenes</a></li>
+          <li><a href="{{ url_for('almacenes.ver_almacenes') }}" class="btn {% if 'almacenes' in request.endpoint %}active{% endif %}">📦 Almacenes</a></li>
           <li><a href="{{ url_for('proveedores.listar_proveedores') }}" class="btn {% if 'proveedores' in request.endpoint %}active{% endif %}">🤝 Proveedores</a></li>
           <li><a href="{{ url_for('clientes.clientes') }}" class="btn {% if 'clientes' in request.endpoint %}active{% endif %}">👤 Clientes</a></li>
           <li><a href="{{ url_for('compras.compras') }}" class="btn {% if 'compras.' in request.endpoint %}active{% endif %}">🛒 Compras</a></li>
