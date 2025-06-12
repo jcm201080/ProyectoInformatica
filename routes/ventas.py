@@ -65,11 +65,9 @@ def ventas():
 
 @ventas_bp.route("/nueva_venta", methods=["GET", "POST"])
 @rol_requerido('admin')
-
 # 🆕 nueva_venta()
 # ES: Permite registrar una nueva venta. Valida stock por ubicación y descuenta unidades tras la venta.
 # EN: Allows registering a new sale. Validates stock by location and updates quantities after the sale.
-
 def nueva_venta():
     clientes = sesion.query(Cliente).all()
     productos = sesion.query(Producto).all()
@@ -110,7 +108,11 @@ def nueva_venta():
 
             if not stock_ubicado or stock_ubicado.cantidad < cantidad:
                 disponible = stock_ubicado.cantidad if stock_ubicado else 0
-                flash(f"No hay suficiente stock de {producto.nombre} en esta ubicación. Quedan {disponible}.", "error")
+                stock_total = sesion.query(func.sum(StockPorUbicacion.cantidad)).filter_by(producto_id=producto.id).scalar() or 0
+
+                flash(f"No hay suficiente stock de {producto.nombre} en esta ubicación. "
+                      f"Quedan {disponible} aquí y {stock_total} en total.", "error")
+
                 return render_template("ventas/nueva_venta.html",
                                        clientes=clientes,
                                        productos=productos,
@@ -169,14 +171,12 @@ def nueva_venta():
 #Cambia estado de pago
 @ventas_bp.route("/cambiar_estado_pago/<int:venta_id>/<int:nuevo_estado>", methods=["POST"])
 @login_required
-
 # 🔁 cambiar_estado_pago()
 # ES: Cambia el estado de pago (pagado/no pagado) de una venta concreta.
 # EN: Changes the payment status (paid/unpaid) of a specific sale.
-
 def cambiar_estado_pago(venta_id, nuevo_estado):
     # Usamos `sesion` en lugar de `db`
-    venta = sesion.get(Venta, venta_id)  # Aquí cambiamos db por sesion
+    venta = sesion.get(Venta, venta_id)
     if venta:
         # Convertir el estado numérico a booleano
         venta.pagado = bool(nuevo_estado)
@@ -188,11 +188,9 @@ def cambiar_estado_pago(venta_id, nuevo_estado):
 
 @ventas_bp.route("/venta_detalle/<int:venta_id>")
 @login_required
-
 # 🔎 ver_detalle_venta()
 # ES: Muestra los detalles de una venta específica, incluyendo productos y precios.
 # EN: Displays the details of a specific sale, including products and pricing.
-
 def ver_detalle_venta(venta_id):
     # Obtener la venta y sus productos asociados
     venta = sesion.query(Venta).get(venta_id)
@@ -225,11 +223,9 @@ def ver_detalle_venta(venta_id):
 
 @ventas_bp.route("/registrar_venta", methods=["POST"])
 @rol_requerido('admin')
-
 # 🧾 registrar_venta()
 # ES: Registra una venta directa desde formulario, valida stock y descuenta productos.
 # EN: Registers a sale from a form, validates stock, and updates product quantities.
-
 def registrar_venta():
     # Datos recibidos del formulario de venta
     productos_vendidos = request.form.getlist('productos')  # Lista de productos vendidos
@@ -267,26 +263,13 @@ def registrar_venta():
     return redirect(url_for('ventas.ventas'))  # Redirigir al listado de ventas
 
 
-#Gráficas
-@ventas_bp.route('/graficas_ventas')
-@login_required
-
-# 📊 graficas_ventas()
-# ES: Muestra la plantilla base para ver gráficas relacionadas con ventas.
-# EN: Displays the base template for viewing sales-related graphs.
-
-def graficas_ventas():
-    return render_template('ventas/graficas.html')
-
 
 #Venta por productos
 @ventas_bp.route("/datos_ventas")
 @login_required
-
 # 📈 datos_ventas()
 # ES: Devuelve datos agregados por producto en formato JSON para usar en gráficas.
 # EN: Returns aggregated product data in JSON format for use in graphs.
-
 def datos_ventas():
     # Realizar la consulta para obtener la suma de las cantidades por producto
     datos = sesion.query(
@@ -310,11 +293,9 @@ def datos_ventas():
 @ventas_bp.route('/ventas/eliminar/<int:venta_id>', methods=['POST'])
 @login_required
 @rol_requerido('admin')
-
 # ❌ eliminar_venta()
 # ES: Elimina una venta y sus detalles asociados de la base de datos.
 # EN: Deletes a sale and its associated details from the database.
-
 def eliminar_venta(venta_id):
     venta = sesion.query(Venta).get(venta_id)
     if not venta:
@@ -331,25 +312,50 @@ def eliminar_venta(venta_id):
     return redirect(url_for("ventas.ventas"))
 
 
+
 @ventas_bp.route('/ventas/eliminar_producto/<int:detalle_id>', methods=['POST'])
 @login_required
 @rol_requerido('admin')
-
 # 🗑️ eliminar_producto()
 # ES: Elimina un producto específico de una venta y actualiza la base de datos.
 # EN: Deletes a specific product from a sale and updates the database.
-
 def eliminar_producto(detalle_id):
     detalle = sesion.query(DetalleVenta).get(detalle_id)
     if not detalle:
         flash("Producto no encontrado en la venta", "error")
         return redirect(url_for("ventas.ventas"))
 
-    venta_id = detalle.venta_id  # para redirigir de vuelta a la factura
+    venta_id = detalle.venta_id
+    producto_id = detalle.producto_id
+    cantidad_eliminada = detalle.cantidad
+
+    # Obtener ubicación de la venta
+    venta = sesion.query(Venta).get(venta_id)
+    ubicacion_id = venta.ubicacion_id
+
+    # Devolver el stock a la ubicación correspondiente
+    stock_ubicado = sesion.query(StockPorUbicacion).filter_by(
+        producto_id=producto_id,
+        ubicacion_id=ubicacion_id
+    ).first()
+
+    if stock_ubicado:
+        stock_ubicado.cantidad += cantidad_eliminada
+    else:
+        # Si no existía, lo creamos
+        nuevo_stock = StockPorUbicacion(
+            producto_id=producto_id,
+            ubicacion_id=ubicacion_id,
+            cantidad=cantidad_eliminada
+        )
+        sesion.add(nuevo_stock)
+
     sesion.delete(detalle)
     sesion.commit()
-    flash("Producto eliminado de la venta 🗑️", "success")
+
+    flash("Producto eliminado de la venta y stock actualizado ✅", "success")
     return redirect(url_for("ventas.ver_detalle_venta", venta_id=venta_id))
+
 
 
 @ventas_bp.route('/ventas/editar_producto/<int:detalle_id>', methods=['GET', 'POST'])

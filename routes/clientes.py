@@ -122,15 +122,21 @@ def editar_cliente(id):
 def eliminar_cliente(id):
     cliente = sesion.query(Cliente).filter_by(id=id).first()
 
-    if cliente:
-        try:
-            sesion.delete(cliente)
-            sesion.commit()
-            flash('Cliente eliminado correctamente.', 'success')
-        except Exception as e:
-            sesion.rollback()
-            flash(f'Error al eliminar cliente: {str(e)}', 'danger')
-    else:
+    if not cliente:
         flash('Cliente no encontrado.', 'warning')
+        return redirect(url_for('clientes.clientes'))
+
+    try:
+        sesion.delete(cliente)
+        sesion.commit()
+        flash('✅ Cliente eliminado correctamente.', 'success')
+    except Exception as e:
+        sesion.rollback()
+        # Verificamos si es un error de integridad referencial
+        if "NOT NULL constraint failed: Venta.cliente_id" in str(e):
+            flash('❌ No se puede eliminar el cliente porque tiene ventas asociadas.', 'warning')
+        else:
+            flash(f'⚠️ Error inesperado al eliminar cliente: {str(e)}', 'danger')
 
     return redirect(url_for('clientes.clientes'))
+
