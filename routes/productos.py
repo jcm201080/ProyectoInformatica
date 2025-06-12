@@ -1,5 +1,9 @@
+from logging import warning
+
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from db import sesion, Producto, login_required, rol_requerido
+from db import sesion, Producto, login_required, rol_requerido, DetalleVenta
+from sqlalchemy.exc import IntegrityError
+
 
 # 🔹 Definir blueprint para productos / Define blueprint for products
 productos_bp = Blueprint('productos', __name__)
@@ -77,9 +81,12 @@ def add_product():
         sesion.add(nuevo_producto)
         sesion.commit()
         flash("Producto añadido correctamente.")
+    except IntegrityError:
+        sesion.rollback()
+        flash(f"Ya existe un producto con el nombre '{nombre}'. Introduce otro nombre.", "error")
     except Exception as e:
         sesion.rollback()
-        flash(f"Error al añadir producto: {str(e)}")
+        flash(f"Error al añadir producto: {str(e)}", "error")
 
     return redirect(url_for('productos.nuevo_producto'))
 
@@ -102,10 +109,10 @@ def editar_producto(id):
 
         try:
             sesion.commit()
-            flash('Producto actualizado correctamente.')
+            flash('Producto actualizado correctamente.', 'success')
         except Exception as e:
             sesion.rollback()
-            flash(f'Error al actualizar producto: {str(e)}')
+            flash(f'Error al actualizar producto: {str(e)}', 'warning')
 
         return redirect(url_for('productos.ver_productos'))
 
@@ -117,14 +124,33 @@ def editar_producto(id):
 def eliminar_producto(id):
     producto = sesion.query(Producto).filter_by(id=id).first()
 
-    if producto:
+    if not producto:
+        flash('❌ Producto no encontrado.')
+        return redirect(url_for('productos.ver_productos'))
+
+    # Comprobar si el producto tiene ventas asociadas
+    venta_asociada = sesion.query(DetalleVenta).filter_by(producto_id=id).first()
+
+    if venta_asociada:
+        flash('⚠️ No se puede eliminar el producto porque ya ha sido vendido.', 'warning')
+        return redirect(url_for('productos.ver_productos'))
+
+    # (Opcional) Evitar borrar productos con stock
+    if producto.cantidad > 0:
+        flash('⚠️ No se puede eliminar un producto con stock mayor que cero.', 'warning')
+        return redirect(url_for('productos.ver_productos'))
+
+
+    try:
         sesion.delete(producto)
         sesion.commit()
-        flash('Producto eliminado correctamente.')
-    else:
-        flash('Producto no encontrado.')
+        flash('✅ Producto eliminado correctamente.', 'success')
+    except Exception as e:
+        sesion.rollback()
+        flash(f'❌ Error al eliminar el producto: {e}', 'warning')
 
-    return redirect(url_for('producto/productos.ver_productos'))
+    return redirect(url_for('productos.ver_productos'))
+
 
 # ⚠️ Verificación de stock bajo (menos del 10%) / Low stock warning (<10%)
 def verificar_stock_bajo():

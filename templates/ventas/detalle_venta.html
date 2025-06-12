@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container mt-4">
-    <h2>🧾 Factura #{{ venta.id }}</h2>
+    <h2>🧾 Factura Número: {{ venta.id }}</h2>
 
     <p><strong>👤 Cliente:</strong> {{ venta.cliente.nombre }}</p>
+    <p><strong>📍 Oficina de Venta:</strong> {{ venta.ubicacion.nombre }}</p>
     <p><strong>📅 Fecha:</strong> {{ venta.fecha }}</p>
     <p><strong>🔖 Descuento Aplicado:</strong> {{ descuento }}</p>
     <p><strong>💰 Total Final:</strong> {{ total_final }}</p>
