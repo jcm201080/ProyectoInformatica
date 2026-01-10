@@ -17,19 +17,22 @@
             {% set nueva_direccion = 'desc' if direccion == 'asc' else 'asc' %}
 
                 <tr>
-                    <th class="col-id"><a href="{{ url_for('productos.ver_productos', orden='id', direccion=nueva_direccion) }}">ID
-                    </a></th>
-                    <th><a href="{{ url_for('productos.ver_productos', orden='nombre', direccion=nueva_direccion) }}">Nombre
+                    <th class="col-id">
+                        <a href="{{ url_for('productos.ver_productos', orden='id', direccion=nueva_direccion) }}">ID</a>
+                    </th>
+                    <th>
+                        <a href="{{ url_for('productos.ver_productos', orden='nombre', direccion=nueva_direccion) }}">Nombre
                         {% if orden == 'nombre' %}
                             {% if direccion == 'asc' %} ↑ {% else %} ↓ {% endif %}
-                        {% endif %}
-                    </a></th>
+                        {% endif %}</a>
+                    </th>
                     <th>Descripción</th>
-                    <th><a href="{{ url_for('productos.ver_productos', orden='precio', direccion=nueva_direccion) }}">Precio
+                    <th>
+                        <a href="{{ url_for('productos.ver_productos', orden='precio', direccion=nueva_direccion) }}">Precio
                         {% if orden == 'precio' %}
                             {% if direccion == 'asc' %} ↑ {% else %} ↓ {% endif %}
-                        {% endif %}
-                    </a></th>
+                        {% endif %}</a>
+                    </th>
                     <th class="col-stock">Stock</th>
                     <th class="col-acciones">Acciones</th>
                 </tr>

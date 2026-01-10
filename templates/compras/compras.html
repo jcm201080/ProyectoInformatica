@@ -22,6 +22,12 @@
                 <th class="col-id">
                   <a href="{{ url_for('compras.compras', orden='id', direccion=nueva_direccion, pagina=pagina) }}">ID</a>
                 </th>
+                  <th>
+                        <a href="{{ url_for('productos.ver_productos', orden='nombre', direccion=nueva_direccion) }}">Nombre
+                        {% if orden == 'nombre' %}
+                            {% if direccion == 'asc' %} ↑ {% else %} ↓ {% endif %}
+                        {% endif %}</a>
+                    </th>
                 <th>
                   <a href="{{ url_for('compras.compras', orden='proveedor', direccion=nueva_direccion, pagina=pagina) }}">Proveedor</a>
                 </th>
@@ -37,6 +43,7 @@
                 {% for compra in compras %}
                 <tr>
                     <td>{{ compra.id }}</td>
+                    <td>{{ compra.producto.nombre }}</td>
                     <td>{{ compra.proveedor.nombre }}</td>
                     <td>{{ compra.fecha }}</td>
                     <td>{{ compra.total }}</td>

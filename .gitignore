@@ -24,3 +24,12 @@ venv/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# .env files
+.env
+
+
+#gradient files
+static/graficas/*.png
+static/graficas/*.jpg
+static/graficas/*.jpeg

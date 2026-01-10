@@ -14,12 +14,16 @@ from routes.graficas import graficas_bp
 from routes.graficas_py import graficas_py_bp
 from routes.almacenes import almacenes_bp
 
+from dotenv import load_dotenv
+load_dotenv()
+
+
 
 # 🚀 Crear aplicación Flask
 # ✨ Create the Flask app
 app = Flask(__name__)
 app.config['DEBUG'] = True
-app.secret_key = 'clavesecreta'  # Clave para manejar sesiones / Secret key for session handling
+app.secret_key = os.environ.get("SECRET_KEY", "fallback-dev")  # Clave para manejar sesiones / Secret key for session handling
 
 # 🔐 Activa errores explícitos si faltan variables en las plantillas
 # Esto ayuda a detectar fallos como variables no pasadas en render_template()
@@ -99,7 +103,17 @@ app.register_blueprint(almacenes_bp)
 
 # ▶️ Iniciar la aplicación si este archivo es el principal / Run the app if executed directly
 if __name__ == '__main__':
-    import os
+    import os, webbrowser
+    from multiprocessing import current_process
+
     port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    url = f"http://127.0.0.1:{port}"
+
+    # Solo abrir navegador si es el proceso principal (no el reloader de Flask)
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        webbrowser.open(url)
+
+    app.run(host="0.0.0.0", port=port, debug=True)
+
+
 
