@@ -113,7 +113,9 @@ if __name__ == '__main__':
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         webbrowser.open(url)
 
-    app.run(host="0.0.0.0", port=port, debug=True)
+    debug = os.environ.get("DEBUG", "0") == "1"
+    app.run(host="0.0.0.0", port=port, debug=debug)
+
 
 
 
