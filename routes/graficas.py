@@ -1,9 +1,14 @@
 from flask import Blueprint, render_template, jsonify, request
-from db import sesion, Producto, Proveedor, Cliente, Venta, DetalleVenta, login_required, rol_requerido
 from sqlalchemy import func
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
+from db import (
+    Session,
+    Producto,
+    Proveedor,
+    Cliente,
+    Venta,
+    DetalleVenta,
+    login_required
+)
 
 graficas_bp = Blueprint('graficas', __name__)
 
@@ -12,43 +17,77 @@ graficas_bp = Blueprint('graficas', __name__)
 # =========================
 
 @graficas_bp.route('/graficas/js')
+@login_required
 def graficas():
     return render_template('graficas/js/graficas.html')
 
+
 # 📊 Stock actual por producto
 @graficas_bp.route('/graficas/stock_productos')
+@login_required
 def stock_productos():
-    datos = sesion.query(Producto.nombre, Producto.stock).all()
-    nombres = [nombre for nombre, _ in datos]
-    stocks = [stock for _, stock in datos]
-    return jsonify({"nombres": nombres, "stocks": stocks})
+    sesion = Session()
+    try:
+        datos = sesion.query(Producto.nombre, Producto.stock).all()
+        return jsonify({
+            "nombres": [n for n, _ in datos],
+            "stocks": [s for _, s in datos]
+        })
+    finally:
+        sesion.close()
+
 
 # 🧾 Ventas por cliente
 @graficas_bp.route('/graficas/ventas_por_cliente')
+@login_required
 def ventas_por_cliente():
-    datos = sesion.query(
-        Cliente.nombre,
-        func.sum(Venta.total_final)
-    ).join(Venta).group_by(Cliente.nombre).all()
-    nombres = [cliente for cliente, _ in datos]
-    totales = [float(total) for _, total in datos]
-    return jsonify({"clientes": nombres, "totales": totales})
+    sesion = Session()
+    try:
+        datos = (
+            sesion.query(
+                Cliente.nombre,
+                func.sum(Venta.total_final)
+            )
+            .join(Venta)
+            .group_by(Cliente.nombre)
+            .all()
+        )
+
+        return jsonify({
+            "clientes": [c for c, _ in datos],
+            "totales": [float(t) for _, t in datos]
+        })
+    finally:
+        sesion.close()
+
 
 # 💰 Ingresos por mes
 @graficas_bp.route('/graficas/ingresos_por_mes')
+@login_required
 def ingresos_por_mes():
-    datos = sesion.query(
-        func.substr(Venta.fecha, 6, 2).label("mes"),
-        func.sum(Venta.total_final).label("ingresos")
-    ).group_by(func.substr(Venta.fecha, 6, 2)).order_by("mes").all()
-    meses = [mes for mes, _ in datos]
-    ingresos = [float(ingreso) for _, ingreso in datos]
-    return jsonify({"meses": meses, "ingresos": ingresos})
+    sesion = Session()
+    try:
+        datos = (
+            sesion.query(
+                func.substr(Venta.fecha, 6, 2).label("mes"),
+                func.sum(Venta.total_final).label("ingresos")
+            )
+            .group_by("mes")
+            .order_by("mes")
+            .all()
+        )
 
+        return jsonify({
+            "meses": [m for m, _ in datos],
+            "ingresos": [float(i) for _, i in datos]
+        })
+    finally:
+        sesion.close()
 
 
 # 📆 Ventas por producto en un mes dado
 @graficas_bp.route("/api/ventas_por_mes")
+@login_required
 def api_ventas_por_mes():
     anio = request.args.get("anio")
     mes = request.args.get("mes")
@@ -56,15 +95,15 @@ def api_ventas_por_mes():
     if not anio or not mes:
         return jsonify({"error": "Debes proporcionar año y mes"}), 400
 
+    sesion = Session()
     try:
-        # Consulta a la base de datos filtrando por año y mes
         detalles = (
             sesion.query(
-                Producto.nombre.label("producto_nombre"),
-                func.sum(DetalleVenta.cantidad).label("total_cantidad")
+                Producto.nombre.label("producto"),
+                func.sum(DetalleVenta.cantidad).label("cantidad")
             )
-            .join(DetalleVenta, Producto.id == DetalleVenta.producto_id)
-            .join(Venta, DetalleVenta.venta_id == Venta.id)
+            .join(DetalleVenta)
+            .join(Venta)
             .filter(
                 func.extract('year', Venta.fecha) == int(anio),
                 func.extract('month', Venta.fecha) == int(mes)
@@ -73,13 +112,13 @@ def api_ventas_por_mes():
             .all()
         )
 
-        productos = [p for p, _ in detalles]
-        cantidades = [c for _, c in detalles]
-
         return jsonify({
-            "productos": productos,
-            "cantidades": cantidades
+            "productos": [p for p, _ in detalles],
+            "cantidades": [int(c) for _, c in detalles]
         })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+    finally:
+        sesion.close()

@@ -1,7 +1,18 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for, session, flash
-from db import engine, Base, verify_user, sesion, crear_usuarios_por_defecto, Cliente, login_required, Ubicacion, Venta
 from jinja2 import StrictUndefined
+from db import (
+    engine,
+    Base,
+    verify_user,
+    crear_usuarios_por_defecto,
+    Cliente,
+    login_required,
+    Ubicacion,
+    Venta,
+    Session
+)
+
 
 # Importar Blueprints (rutas organizadas)
 from routes.index import index_bp
@@ -78,11 +89,24 @@ def logout():
 
 # Paso 2: Inicializar ubicaciones por defecto en main.py
 def crear_ubicaciones_por_defecto():
-    ubicaciones = ["Almacén", "Oficina1 (Sevilla)", "Oficina2 (Madrid)", "Oficina3 (Valencia)"]
-    for nombre in ubicaciones:
-        if not sesion.query(Ubicacion).filter_by(nombre=nombre).first():
-            sesion.add(Ubicacion(nombre=nombre))
-    sesion.commit()
+    sesion = Session()
+    try:
+        ubicaciones = [
+            "Almacén",
+            "Oficina1 (Sevilla)",
+            "Oficina2 (Madrid)",
+            "Oficina3 (Valencia)"
+        ]
+
+        for nombre in ubicaciones:
+            existe = sesion.query(Ubicacion).filter_by(nombre=nombre).first()
+            if not existe:
+                sesion.add(Ubicacion(nombre=nombre))
+
+        sesion.commit()
+    finally:
+        sesion.close()
+
 
 crear_ubicaciones_por_defecto()
 

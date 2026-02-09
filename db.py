@@ -14,7 +14,7 @@ import os
 from sqlalchemy import create_engine
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "database", "tu_base_de_datos.db")
+DB_PATH = os.path.join(BASE_DIR, "database", "productos.db")
 
 engine = create_engine(
     f"sqlite:///{DB_PATH}",
@@ -23,7 +23,7 @@ engine = create_engine(
 
 #Creamos la sesion, lo que nos permite realizar transacciones dentro de la base de datos
 Session = sessionmaker(bind=engine)
-sesion = Session()
+
 #Esta clase se encarga de mapear la info de las clases en las que hereda y vincular su información a tablas de la base de datos
 Base = declarative_base()
 
@@ -118,8 +118,7 @@ class Compra(Base):
     producto = relationship("Producto")
     proveedor = relationship("Proveedor")
 
-# 🚪 Crear las tablas al ejecutar / Create tables on script load
-Base.metadata.create_all(engine)
+
 
 
 
@@ -152,27 +151,43 @@ class Usuario(Base):
 # 🔐 Registrar nuevo usuario / Register new user
 # Devuelve False si ya existe el usuario / Returns False if username exists
 def register_user(usuario, contrasena, rol='cliente'):
-    existente = sesion.query(Usuario).filter_by(usuario=usuario).first()
-    if existente:
-        return False
-    hashed_pw = generate_password_hash(contrasena)
-    nuevo = Usuario(usuario=usuario, contrasena=hashed_pw, rol=rol)
-    sesion.add(nuevo)
-    sesion.commit()
-    return True
+    sesion = Session()
+    try:
+        existente = sesion.query(Usuario).filter_by(usuario=usuario).first()
+        if existente:
+            return False
+
+        hashed_pw = generate_password_hash(contrasena)
+        nuevo = Usuario(usuario=usuario, contrasena=hashed_pw, rol=rol)
+        sesion.add(nuevo)
+        sesion.commit()
+        return True
+    finally:
+        sesion.close()
+
 
 
 # 🔎 Verificar usuario y contraseña / Verify username and password
 def verify_user(usuario, contrasena):
-    user = sesion.query(Usuario).filter_by(usuario=usuario).first()
-    if user and check_password_hash(user.contrasena, contrasena):
-        return {'id': user.id, 'usuario': user.usuario, 'rol': user.rol}
-    return None
+    sesion = Session()
+    try:
+        user = sesion.query(Usuario).filter_by(usuario=usuario).first()
+        if user and check_password_hash(user.contrasena, contrasena):
+            return {'id': user.id, 'usuario': user.usuario, 'rol': user.rol}
+        return None
+    finally:
+        sesion.close()
+
 
 
 # 🔍 Obtener usuario por nombre / Get user by username
 def get_user_by_username(usuario):
-    return sesion.query(Usuario).filter_by(usuario=usuario).first()
+    sesion = Session()
+    try:
+        return sesion.query(Usuario).filter_by(usuario=usuario).first()
+    finally:
+        sesion.close()
+
 
 
 # 🔒 Decorador para rutas protegidas / Require login to access route
