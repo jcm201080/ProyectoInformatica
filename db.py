@@ -10,7 +10,17 @@ import sqlite3
 
 # 🚀 Configuración de la base de datos / Database configuration
 # Engine permite a SALAlchemy comunicarse con la base de datos
-engine = create_engine('sqlite:///database/productos.db', connect_args={'check_same_thread': False})
+import os
+from sqlalchemy import create_engine
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, "database", "productos.db")
+
+engine = create_engine(
+    f"sqlite:///{DB_PATH}",
+    connect_args={"check_same_thread": False}
+)
+
 #Creamos la sesion, lo que nos permite realizar transacciones dentro de la base de datos
 Session = sessionmaker(bind=engine)
 sesion = Session()
