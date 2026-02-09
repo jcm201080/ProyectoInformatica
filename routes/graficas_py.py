@@ -41,7 +41,7 @@ def generar_grafico_ventas_por_ubicacion():
 
 # Página principal que genera todas las gráficas
 @graficas_py_bp.route("/graficas/python")
-@rol_requerido('admin')
+@login_required
 def graficas_python():
     os.makedirs("static/graficas", exist_ok=True)
 

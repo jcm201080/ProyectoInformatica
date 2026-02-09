@@ -197,6 +197,7 @@ def rol_requerido(rol_permitido):
 def crear_usuarios_por_defecto():
     admin_creado = register_user("jcm", "1234", "admin")
     cliente_creado = register_user("cliente", "1234", "cliente")
+    demo_creado = register_user("demo", "demo123", "cliente")
 
     if admin_creado:
         print("\u2705 Usuario admin creado.")
@@ -208,6 +209,10 @@ def crear_usuarios_por_defecto():
     else:
         print("\u26a0\ufe0f El usuario cliente ya existe.")
 
+    if demo_creado:
+        print("\u2705 Usuario demo creado.")
+    else:
+        print("\u26a0\ufe0f El usuario demo ya existe.")
 
 
 

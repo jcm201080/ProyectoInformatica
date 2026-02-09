@@ -11,6 +11,24 @@
 
     <!-- 🎨 Tu hoja de estilos personalizada -->
     <link rel="stylesheet" href="/static/estilos.css">
+
+
+    <!--🔒 Modo demo: ocultar acciones peligrosas para usuarios no admin-->
+    {% if session.get('rol') != 'admin' %}
+    <style>
+        /* 🔒 Modo demo: ocultar acciones peligrosas */
+        .admin-only {
+            display: none !important;
+        }
+
+        /* Desactivar formularios solo visualmente */
+        form.admin-only {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+    </style>
+    {% endif %}
+
 </head>
 <body>
 <div class="wrapper">
